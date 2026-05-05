@@ -11,19 +11,35 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, doc, deleteDoc, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, doc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'coosajo-platform-final';
+        // --- MANEJO SEGURO DE CONFIGURACIÓN ---
+        // Si usas este archivo fuera de este chat (ej. GitHub), debes reemplazar {} por tu objeto de configuración de Firebase
+        let firebaseConfig = {};
+        try {
+            if (typeof __firebase_config !== 'undefined') {
+                firebaseConfig = JSON.parse(__firebase_config);
+            }
+        } catch (e) {
+            console.warn("Configuración de Firebase no detectada. Funcionando en modo local.");
+        }
+
+        let db, auth, appId;
+        const isFirebaseReady = firebaseConfig && firebaseConfig.apiKey;
+
+        if (isFirebaseReady) {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            appId = typeof __app_id !== 'undefined' ? __app_id : 'coosajo-final-v2';
+        }
 
         const COLORS = { blue: '#172e59', green: '#158e45' };
 
-        // --- EL REPORTE QUE NO PODÍA FALTAR ---
+        // --- REPORTE MAESTRO DE ABRIL (SIEMPRE DISPONIBLE) ---
         const INITIAL_REPORT = {
+            id: "reporte-abril-original",
             reportTitle: 'Reporte de Plazas - Abril',
             campaignName: '¡Estamos creciendo contigo!',
             startDate: '2026-04-16',
@@ -39,15 +55,16 @@
 
         window.appState = {
             user: null,
-            reports: [],
+            reports: [INITIAL_REPORT],
             currentView: 'login',
-            selectedReport: null
+            selectedReport: null,
+            isLoading: false
         };
 
         const render = () => {
             const root = document.getElementById('root');
             const view = window.appState.currentView;
-
+            
             if (view === 'login') root.innerHTML = LoginView();
             else if (view === 'list') root.innerHTML = ListView();
             else if (view === 'create') root.innerHTML = CreateView();
@@ -56,28 +73,23 @@
             setupEventListeners();
         };
 
-        // --- VISTAS ---
+        // --- COMPONENTES DE VISTA ---
         const LoginView = () => `
             <div class="min-h-screen flex items-center justify-center bg-gray-100 p-4">
                 <div class="max-w-md w-full bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-gray-100 animate-fade-in">
                     <div class="p-12 text-center" style="background-color: ${COLORS.blue}">
                         <div class="bg-white p-3 rounded-full w-24 h-24 mx-auto mb-6 shadow-xl flex items-center justify-center border-4 border-[#158e45]">
-                            <img src="LOGO COOSAJO SIN ESLOGAN.png" alt="Logo" class="w-full h-full object-contain" onerror="this.src='https://via.placeholder.com/100?text=Logo'">
+                            <img src="LOGO COOSAJO SIN ESLOGAN.png" alt="Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/100x100?text=COOSAJO'">
                         </div>
-                        <h2 class="text-white text-2xl font-black uppercase tracking-tight leading-tight">Portal de Reportes</h2>
+                        <h2 class="text-white text-2xl font-black uppercase tracking-tight">Portal de Reportes</h2>
                         <p class="text-white/50 text-[10px] font-bold tracking-[0.3em] uppercase mt-1">Coosajo Micoope</p>
                     </div>
                     <form id="loginForm" class="p-10 space-y-6">
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Usuario</label>
-                            <input type="text" id="username" required class="w-full p-4 rounded-2xl bg-gray-50 border-none outline-none focus:ring-2 focus:ring-[#158e45] transition-all" placeholder="sjemartinez">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Contraseña</label>
-                            <input type="password" id="password" required class="w-full p-4 rounded-2xl bg-gray-50 border-none outline-none focus:ring-2 focus:ring-[#158e45]" placeholder="••••••••">
-                        </div>
+                        <input type="text" id="username" required class="w-full p-4 rounded-2xl bg-gray-50 border-none outline-none focus:ring-2 focus:ring-[#158e45]" placeholder="Usuario (sjemartinez)">
+                        <input type="password" id="password" required class="w-full p-4 rounded-2xl bg-gray-50 border-none outline-none focus:ring-2 focus:ring-[#158e45]" placeholder="Contraseña">
                         <div id="loginError" class="hidden text-red-500 text-xs font-bold text-center bg-red-50 p-3 rounded-xl"></div>
-                        <button type="submit" class="w-full py-5 rounded-2xl text-white font-black uppercase tracking-widest shadow-xl hover:brightness-110 active:scale-95 transition-all" style="background-color: ${COLORS.blue}">Ingresar</button>
+                        <button type="submit" class="w-full py-5 rounded-2xl text-white font-black uppercase tracking-widest shadow-xl hover:brightness-110 transition-all" style="background-color: ${COLORS.blue}">Entrar</button>
+                        ${!isFirebaseReady ? '<p class="text-[9px] text-gray-400 text-center uppercase tracking-tighter mt-4">Aviso: Modo Local (Sin base de datos)</p>' : ''}
                     </form>
                 </div>
             </div>
@@ -88,33 +100,28 @@
                 <nav class="sticky top-0 z-50 text-white p-4 shadow-xl" style="background-color: ${COLORS.blue}">
                     <div class="max-w-7xl mx-auto flex justify-between items-center">
                         <div class="flex items-center gap-3">
-                            <img src="LOGO COOSAJO SIN ESLOGAN.png" alt="Logo" class="h-10 bg-white rounded-full p-1 border border-white">
-                            <h1 class="font-black uppercase tracking-tighter text-lg hidden md:block">Gestión de Reportes</h1>
+                            <img src="LOGO COOSAJO SIN ESLOGAN.png" alt="Logo" class="h-10 bg-white rounded-full p-1 border border-white" onerror="this.style.display='none'">
+                            <h1 class="font-black uppercase tracking-tighter text-lg">Gestión de Reportes</h1>
                         </div>
                         <div class="flex gap-3">
-                            <button onclick="changeView('create')" class="bg-[#158e45] px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform shadow-lg">Nuevo Informe</button>
-                            <button onclick="logout()" class="text-white/40 hover:text-white transition-colors"><i class="fa-solid fa-right-from-bracket"></i></button>
+                            <button onclick="changeView('create')" class="bg-[#158e45] px-5 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg">Nuevo Informe</button>
+                            <button onclick="logout()" class="text-white/40 hover:text-white transition-colors"><i class="fa-solid fa-sign-out"></i></button>
                         </div>
                     </div>
                 </nav>
                 <main class="max-w-7xl mx-auto p-8 space-y-8 animate-fade-in">
-                    <div>
-                        <h2 class="text-4xl font-black tracking-tight" style="color: ${COLORS.blue}">Historial de Actividad</h2>
-                        <p class="text-gray-400 font-medium">Usted tiene ${window.appState.reports.length} reportes generados.</p>
-                    </div>
+                    <h2 class="text-4xl font-black" style="color: ${COLORS.blue}">Historial de Actividad</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         ${window.appState.reports.map((r) => `
                             <div onclick="openReport('${r.id}')" class="bg-white p-8 rounded-[2.5rem] shadow-sm hover:shadow-2xl transition-all cursor-pointer group relative border border-gray-50 overflow-hidden">
-                                <div class="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform" style="color: ${COLORS.green}">
-                                    <i class="fa-solid fa-file-waveform"></i>
-                                </div>
+                                <div class="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-2xl mb-6" style="color: ${COLORS.green}"><i class="fa-solid fa-file-waveform"></i></div>
                                 <h4 class="font-bold text-xl mb-1 line-clamp-1" style="color: ${COLORS.blue}">${r.reportTitle}</h4>
-                                <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-4">${new Date(r.createdAt).toLocaleDateString('es-GT', {day:'numeric', month:'short', year: 'numeric'})}</p>
+                                <p class="text-[10px] text-gray-400 font-black uppercase mb-4">${new Date(r.createdAt).toLocaleDateString()}</p>
                                 <div class="flex gap-2">
                                     <span class="text-[9px] bg-blue-50 px-2 py-1 rounded-full font-bold uppercase" style="color: ${COLORS.blue}">${r.reach.toLocaleString()} Vistas</span>
-                                    <span class="text-[9px] bg-green-50 px-2 py-1 rounded-full font-bold uppercase" style="color: ${COLORS.green}">${r.results} Interesados</span>
+                                    <span class="text-[9px] bg-green-50 px-2 py-1 rounded-full font-bold uppercase" style="color: ${COLORS.green}">${r.results} Postulantes</span>
                                 </div>
-                                <button onclick="deleteReport(event, '${r.id}')" class="absolute top-6 right-6 opacity-0 group-hover:opacity-100 text-gray-200 hover:text-red-500 transition-all"><i class="fa-solid fa-trash-can"></i></button>
+                                ${r.id !== 'reporte-abril-original' ? `<button onclick="deleteReport(event, '${r.id}')" class="absolute top-6 right-6 opacity-0 group-hover:opacity-100 text-gray-200 hover:text-red-500 transition-all"><i class="fa-solid fa-trash-can"></i></button>` : ''}
                             </div>
                         `).join('')}
                     </div>
@@ -124,31 +131,26 @@
 
         const CreateView = () => `
             <div class="min-h-screen bg-[#f0f4f8]">
-                <nav class="text-white p-4 shadow-xl" style="background-color: ${COLORS.blue}">
-                    <div class="max-w-7xl mx-auto flex items-center gap-4">
-                        <button onclick="changeView('list')" class="text-white/60 hover:text-white"><i class="fa-solid fa-arrow-left"></i></button>
-                        <h1 class="font-black uppercase tracking-widest text-sm">Crear Nuevo Informe</h1>
-                    </div>
-                </nav>
+                <nav class="text-white p-4 shadow-xl" style="background-color: ${COLORS.blue}"><div class="max-w-7xl mx-auto flex items-center gap-4"><button onclick="changeView('list')"><i class="fa-solid fa-arrow-left"></i></button><h1 class="font-black uppercase text-sm">Crear Nuevo Informe</h1></div></nav>
                 <main class="max-w-2xl mx-auto p-8">
-                    <div class="bg-white rounded-[3rem] shadow-2xl p-10 border border-gray-100 animate-zoom-in">
+                    <div class="bg-white rounded-[3rem] shadow-2xl p-10 border border-gray-100">
                         <form id="createForm" class="space-y-6">
-                            <div><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Título del Reporte</label><input type="text" id="rep_title" required class="w-full p-4 rounded-2xl bg-gray-50 border-none outline-none focus:ring-2 focus:ring-[#158e45]"></div>
-                            <div><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Campaña Facebook</label><input type="text" id="rep_camp" required class="w-full p-4 rounded-2xl bg-gray-50 border-none outline-none focus:ring-2 focus:ring-[#158e45]"></div>
+                            <input type="text" id="rep_title" required class="w-full p-4 rounded-2xl bg-gray-50 border-none outline-none" placeholder="Título del Reporte">
+                            <input type="text" id="rep_camp" required class="w-full p-4 rounded-2xl bg-gray-50 border-none outline-none" placeholder="Campaña Facebook">
                             <div class="grid grid-cols-2 gap-4">
-                                <div><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Desde</label><input type="date" id="rep_start" required class="w-full p-4 rounded-2xl bg-gray-50 border-none"></div>
-                                <div><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Hasta</label><input type="date" id="rep_end" required class="w-full p-4 rounded-2xl bg-gray-50 border-none"></div>
+                                <input type="date" id="rep_start" required class="w-full p-4 rounded-2xl bg-gray-50 border-none">
+                                <input type="date" id="rep_end" required class="w-full p-4 rounded-2xl bg-gray-50 border-none">
                             </div>
                             <div class="grid grid-cols-2 gap-4">
-                                <div><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Alcance</label><input type="number" id="rep_reach" required class="w-full p-4 rounded-2xl bg-gray-50 border-none"></div>
-                                <div><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Resultados</label><input type="number" id="rep_res" required class="w-full p-4 rounded-2xl bg-gray-50 border-none"></div>
+                                <input type="number" id="rep_reach" required class="w-full p-4 rounded-2xl bg-gray-50 border-none" placeholder="Alcance">
+                                <input type="number" id="rep_res" required class="w-full p-4 rounded-2xl bg-gray-50 border-none" placeholder="Resultados">
                             </div>
                             <div class="grid grid-cols-3 gap-4">
-                                <div><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Inversión (Q)</label><input type="number" step="0.01" id="rep_inv" required class="w-full p-4 rounded-2xl bg-gray-50 border-none"></div>
-                                <div><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">CTR (%)</label><input type="number" step="0.01" id="rep_ctr" required class="w-full p-4 rounded-2xl bg-gray-50 border-none"></div>
-                                <div><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Interacciones</label><input type="number" id="rep_int" required class="w-full p-4 rounded-2xl bg-gray-50 border-none"></div>
+                                <input type="number" step="0.01" id="rep_inv" required class="w-full p-4 rounded-2xl bg-gray-50 border-none" placeholder="Inversión Q">
+                                <input type="number" step="0.01" id="rep_ctr" required class="w-full p-4 rounded-2xl bg-gray-50 border-none" placeholder="CTR %">
+                                <input type="number" id="rep_int" required class="w-full p-4 rounded-2xl bg-gray-50 border-none" placeholder="Interacciones">
                             </div>
-                            <button type="submit" class="w-full py-5 rounded-2xl text-white font-black uppercase tracking-widest shadow-2xl hover:brightness-110 transition-all" style="background-color: ${COLORS.blue}">Guardar e Ir al Historial</button>
+                            <button type="submit" class="w-full py-5 rounded-2xl text-white font-black uppercase tracking-widest shadow-2xl" style="background-color: ${COLORS.blue}">Guardar e Ir al Historial</button>
                         </form>
                     </div>
                 </main>
@@ -157,17 +159,17 @@
 
         const ReportView = () => {
             const r = window.appState.selectedReport;
-            if (!r) return `<div class="p-20 text-center">Cargando...</div>`;
+            if (!r) return `<div class="p-20 text-center">Error al cargar datos.</div>`;
             const formatDate = (dateStr) => new Date(dateStr + "T12:00:00").toLocaleDateString('es-GT', { day: 'numeric', month: 'long' });
             
             return `
-                <div class="bg-[#f0f4f8] min-h-screen">
+                <div class="bg-[#f0f4f8] min-h-screen pb-20">
                     <div id="report-progress" style="position:fixed; top:0; left:0; height:6px; background:linear-gradient(to right, ${COLORS.green}, ${COLORS.blue}); width:0%; z-index:100; transition:width 0.1s;"></div>
                     <nav class="text-white p-4 shadow-xl sticky top-0 z-50 no-print" style="background-color: ${COLORS.blue}">
                         <div class="max-w-7xl mx-auto flex justify-between items-center">
-                            <button onclick="changeView('list')" class="font-black uppercase tracking-widest text-xs flex items-center gap-2"><i class="fa-solid fa-arrow-left"></i> Volver al Historial</button>
+                            <button onclick="changeView('list')" class="font-black uppercase text-xs flex items-center gap-2"><i class="fa-solid fa-arrow-left"></i> Historial</button>
                             <div class="flex gap-3">
-                                <button onclick="celebrate()" class="bg-[#158e45] px-4 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg"><i class="fa-solid fa-trophy mr-1"></i> Celebrar</button>
+                                <button onclick="celebrate()" class="bg-[#158e45] px-4 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg"><i class="fa-solid fa-trophy"></i></button>
                                 <button onclick="window.print()" class="bg-white/10 px-4 py-2 rounded-xl text-[10px] font-black uppercase"><i class="fa-solid fa-print"></i></button>
                             </div>
                         </div>
@@ -187,56 +189,54 @@
                                     <h3 class="text-4xl font-black" style="color: ${COLORS.blue}">Resumen Ejecutivo</h3>
                                     <div class="inline-flex items-center gap-4 text-white px-6 py-3 rounded-2xl shadow-xl" style="background-color: ${COLORS.blue}">
                                         <i class="fa-solid fa-calendar-check" style="color: ${COLORS.green}"></i>
-                                        <span class="text-sm font-black uppercase tracking-widest">${formatDate(r.startDate)} — ${formatDate(r.endDate)}</span>
+                                        <span class="text-sm font-black uppercase">${formatDate(r.startDate)} — ${formatDate(r.endDate)}</span>
                                     </div>
-                                    <p class="text-gray-600 text-xl leading-relaxed font-light">Se presenta a usted el análisis detallado de la campaña de reclutamiento finalizada. Durante este periodo de 15 días, la estrategia digital ha mantenido una eficiencia de costos sobresaliente.</p>
+                                    <p class="text-gray-600 text-xl leading-relaxed font-light">Análisis detallado de la campaña finalizada. Durante este periodo, la estrategia digital ha mantenido una eficiencia de costos sobresaliente para COOSAJO MICOOPE.</p>
                                 </div>
                                 <div class="md:col-span-2 self-center">
                                     <div class="rounded-[2.5rem] p-8 text-white shadow-2xl" style="background-color: ${COLORS.blue}">
                                         <div class="flex items-center gap-5 mb-8">
-                                            <img src="LOGO COOSAJO SIN ESLOGAN.png" alt="L" class="w-12 h-12 bg-white rounded-full p-1">
-                                            <div><p class="text-[10px] uppercase opacity-50 font-black">Plataforma</p><p class="text-lg font-black">Facebook Ads</p></div>
+                                            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center border border-white/20"><i class="fa-brands fa-facebook-f text-xl text-blue-900"></i></div>
+                                            <div><p class="text-[10px] uppercase opacity-50 font-black">Canal</p><p class="text-lg font-black">Facebook Ads</p></div>
                                         </div>
-                                        <div class="pt-4 border-t border-white/10 flex justify-between"><span>Estado:</span><span class="font-black text-green-300 uppercase">${r.status}</span></div>
+                                        <div class="pt-4 border-t border-white/10 flex justify-between text-sm"><span>Estado:</span><span class="font-black text-green-300 uppercase">${r.status}</span></div>
+                                        <div class="pt-2 flex justify-between text-sm"><span>Inversión:</span><span class="font-black">Q ${r.investment}</span></div>
                                     </div>
                                 </div>
                             </div>
                         </section>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                            ${MetricCard("Alcance Único", r.reach, "fa-users", COLORS.blue)}
-                            ${MetricCard("Interesados", r.results, "fa-user-check", COLORS.green)}
-                            ${MetricCard("Costo Postulante", (r.investment/r.results).toFixed(2), "fa-hand-holding-dollar", COLORS.blue, true)}
+                            ${MetricCardHTML("Alcance Único", r.reach, "fa-users", COLORS.blue)}
+                            ${MetricCardHTML("Postulantes", r.results, "fa-user-check", COLORS.green)}
+                            ${MetricCardHTML("Costo Candidato", (r.investment/(r.results || 1)).toFixed(2), "fa-hand-holding-dollar", COLORS.blue, true)}
                         </div>
 
                         <section class="rounded-[4rem] p-12 md:p-20 text-white shadow-2xl relative overflow-hidden" style="background-color: ${COLORS.blue}">
-                            <div class="max-w-4xl mx-auto space-y-12 relative z-10 text-center">
-                                <h3 class="text-5xl font-black tracking-tight">La Analogía del Reclutador</h3>
-                                <div class="flex flex-col gap-4 items-center mb-16">
-                                    <div class="bg-white/15 p-12 rounded-t-[5rem] text-center border-b border-white/5 w-full max-w-2xl"><p class="text-[10px] font-black uppercase mb-1 text-green-300">Nivel 1: El Alcance</p><p class="text-3xl font-black">${r.reach.toLocaleString()} personas vieron el anuncio</p></div>
-                                    <div class="p-10 w-3/5 rounded-b-[4rem] shadow-2xl" style="background-color: ${COLORS.green}"><p class="text-[10px] font-black uppercase mb-1">Resultados Finales</p><p class="text-5xl font-black leading-none">${r.results.toLocaleString()} Postulantes</p></div>
-                                </div>
-                                <div class="bg-white/10 backdrop-blur-md rounded-3xl p-10 text-left space-y-6">
-                                    <p class="text-xl italic font-light">"Imagina que se ha colocado un módulo de reclutamiento con un gran cartel de <strong>'¡Contratando!'</strong> en una plaza local bastante concurrida."</p>
-                                    <p class="text-gray-300">El Alcance representa a todos los que pasaron por la plaza y voltearon a ver el anuncio. Sin embargo, los <strong>${r.results} interesados</strong> son quienes decidieron acercarse al módulo y decir: <span class="text-green-300 font-bold">"Me interesa esta plaza"</span>.</p>
-                                </div>
+                            <div class="text-center space-y-6 mb-16">
+                                <h3 class="text-5xl font-black tracking-tight leading-tight">La Analogía del Reclutador</h3>
+                                <p class="text-blue-200 text-xl font-light italic">Perspectiva visual de sus vacantes.</p>
+                            </div>
+                            <div class="flex flex-col gap-4 items-center mb-16">
+                                <div class="bg-white/15 p-12 rounded-t-[5rem] text-center border-b border-white/5 w-full max-w-2xl shadow-2xl"><p class="text-[10px] font-black uppercase mb-1 text-green-300">Nivel 1: El Alcance</p><p class="text-3xl font-black">${r.reach.toLocaleString()} personas vieron el anuncio</p></div>
+                                <div class="p-10 w-3/5 rounded-b-[4rem] shadow-2xl" style="background-color: ${COLORS.green}"><p class="text-[10px] font-black uppercase mb-1">Resultados Finales</p><p class="text-5xl font-black leading-none">${r.results.toLocaleString()} Postulantes</p></div>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-md rounded-3xl p-10 text-left space-y-6">
+                                <p class="text-xl italic font-light">"Imagina que se ha colocado un módulo de reclutamiento con un gran cartel de <strong>'¡Contratando!'</strong> en una plaza local bastante concurrida."</p>
+                                <p class="text-gray-300">El Alcance representa a todos los que pasaron por la plaza y voltearon a ver el anuncio. Sin embargo, los <strong>${r.results} interesados</strong> son quienes decidieron acercarse y decir: <span class="text-green-300 font-bold">"Me interesa esta plaza"</span>.</p>
                             </div>
                         </section>
 
                         <div class="bg-white rounded-[3rem] p-12 shadow-xl flex flex-col md:flex-row gap-10 items-center border border-gray-100 no-print">
                             <div class="w-24 h-24 rounded-full flex items-center justify-center text-white text-5xl shrink-0" style="background-color: ${COLORS.blue}"><i class="fa-solid fa-lightbulb"></i></div>
-                            <p class="text-xl text-gray-600 font-light">Se le recomienda que el equipo encargado de contactar a esos postulantes mantenga un protocolo ágil de contacto para capitalizar la inversión de <strong>Q ${r.investment}</strong> realizada.</p>
+                            <p class="text-xl text-gray-600 font-light leading-relaxed">Se le recomienda que el equipo mantenga un protocolo ágil de contacto para capitalizar la inversión de <strong>Q ${r.investment}</strong> realizada.</p>
                         </div>
                     </main>
-                    <footer class="bg-gray-900 text-white py-16 text-center">
-                        <img src="LOGO COOSAJO SIN ESLOGAN.png" alt="Logo" class="h-16 mx-auto mb-6 bg-white p-2 rounded-full">
-                        <p class="text-xs opacity-50 uppercase tracking-widest">Coosajo Micoope &copy; 2026</p>
-                    </footer>
                 </div>
             `;
         };
 
-        const MetricCard = (title, val, icon, color, isQ) => `
+        const MetricCardHTML = (title, val, icon, color, isQ) => `
             <div class="bg-white p-10 rounded-[3rem] shadow-xl border-b-[12px] transition-all hover:translate-y-[-5px]" style="border-bottom: 12px solid ${color}">
                 <div class="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-3xl mb-8" style="color: ${color}"><i class="fa-solid ${icon}"></i></div>
                 <p class="text-gray-400 font-black uppercase text-[11px] tracking-widest mb-3">${title}</p>
@@ -244,12 +244,15 @@
             </div>
         `;
 
+        // --- MANEJO DE EVENTOS ---
         const setupEventListeners = () => {
             const loginForm = document.getElementById('loginForm');
             if (loginForm) {
                 loginForm.addEventListener('submit', (e) => {
                     e.preventDefault();
-                    if (document.getElementById('username').value === 'sjemartinez' && document.getElementById('password').value === 'Coosajo2041') {
+                    const u = document.getElementById('username').value;
+                    const p = document.getElementById('password').value;
+                    if (u === 'sjemartinez' && p === 'Coosajo2041') {
                         window.appState.currentView = 'list';
                         render();
                     } else {
@@ -265,6 +268,7 @@
                 createForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const newReport = {
+                        id: 'rep-' + Date.now(),
                         reportTitle: document.getElementById('rep_title').value,
                         campaignName: document.getElementById('rep_camp').value,
                         startDate: document.getElementById('rep_start').value,
@@ -277,11 +281,16 @@
                         status: 'FINALIZADA',
                         createdAt: new Date().toISOString()
                     };
-                    try {
-                        await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'reports'), newReport);
-                        window.appState.currentView = 'list';
-                        render();
-                    } catch (err) { console.error(err); }
+                    
+                    if (isFirebaseReady) {
+                        try {
+                            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'reports'), newReport);
+                        } catch (err) { console.error("Error al guardar en la nube:", err); }
+                    } else {
+                        window.appState.reports.unshift(newReport);
+                    }
+                    window.appState.currentView = 'list';
+                    render();
                 });
             }
 
@@ -294,6 +303,7 @@
             }
         };
 
+        // --- FUNCIONES GLOBALES ---
         window.changeView = (v) => { window.appState.currentView = v; render(); };
         window.logout = () => { window.appState.currentView = 'login'; render(); };
         window.openReport = (id) => {
@@ -304,45 +314,58 @@
         };
         window.deleteReport = async (e, id) => {
             e.stopPropagation();
-            if(confirm("¿Eliminar este reporte permanentemente?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', id));
+            if(confirm("¿Eliminar este reporte?")) {
+                if (isFirebaseReady) {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', id));
+                } else {
+                    window.appState.reports = window.appState.reports.filter(r => r.id !== id);
+                    render();
+                }
+            }
         };
         window.celebrate = () => confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: [COLORS.green, COLORS.blue, '#ffffff'] });
 
+        // --- INICIALIZACIÓN ---
         const init = async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
-                else await signInAnonymously(auth);
-
-                onAuthStateChanged(auth, async (u) => {
-                    if (u) {
-                        const reportsCol = collection(db, 'artifacts', appId, 'public', 'data', 'reports');
-                        onSnapshot(query(reportsCol), async (snap) => {
-                            let data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                            if (data.length === 0) await addDoc(reportsCol, INITIAL_REPORT); // Auto-add reporte de abril si está vacío
-                            data.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
-                            window.appState.reports = data;
-                            if (window.appState.currentView !== 'login') render();
-                        });
+            if (isFirebaseReady) {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
                     }
-                });
-                render();
-            } catch (err) { console.error(err); }
+
+                    onAuthStateChanged(auth, async (u) => {
+                        if (u) {
+                            const reportsCol = collection(db, 'artifacts', appId, 'public', 'data', 'reports');
+                            onSnapshot(query(reportsCol), async (snap) => {
+                                let dbData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                                if (dbData.length === 0) {
+                                    try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', INITIAL_REPORT.id), INITIAL_REPORT); } catch(e) {}
+                                    dbData = [INITIAL_REPORT];
+                                }
+                                dbData.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+                                window.appState.reports = dbData;
+                                if (window.appState.currentView !== 'login') render();
+                            });
+                        }
+                    });
+                } catch (err) { console.error("Firebase Auth Error:", err); }
+            }
+            render();
         };
+        
         init();
     </script>
 
     <style>
-        * { font-family: 'Poppins', sans-serif; }
-        .animate-fade-in { animation: fadeIn 0.8s ease-out forwards; }
-        .animate-zoom-in { animation: zoomIn 0.4s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        * { font-family: 'Poppins', sans-serif; transition: background-color 0.2s; }
+        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @media print { .no-print { display: none !important; } }
     </style>
 </head>
 <body>
-    <div id="root">
-        <div class="flex h-screen items-center justify-center bg-gray-50"><div class="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-[#172e59]"></div></div>
-    </div>
+    <div id="root"></div>
 </body>
 </html>
