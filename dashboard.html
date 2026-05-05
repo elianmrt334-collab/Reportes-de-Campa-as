@@ -33,7 +33,7 @@
 
         const COLORS = { blue: '#172e59', green: '#158e45' };
 
-        // Reportes base que aparecerán por defecto
+        // Reportes base fijos
         const INITIAL_REPORTS = [
             {
                 id: "reporte-abril-original",
@@ -48,7 +48,7 @@
                 interactions: 469,
                 status: 'FINALIZADA',
                 executiveSummary: 'Análisis detallado de la campaña de reclutamiento finalizada. La estrategia digital ha mantenido una eficiencia de costos sobresaliente.',
-                conclusions: 'Se recomienda mantener el protocolo de atención ágil.',
+                conclusions: 'Se recomienda mantener el protocolo de atención ágil para maximizar resultados.',
                 createdAt: '2026-04-30T23:59:59.000Z'
             },
             {
@@ -63,8 +63,8 @@
                 ctr: 5.80,
                 interactions: 320,
                 status: 'FINALIZADA',
-                executiveSummary: 'Informe de los esfuerzos iniciales de captación.',
-                conclusions: 'La fase inicial demostró buena respuesta del mercado local.',
+                executiveSummary: 'Informe de los esfuerzos iniciales de captación regional.',
+                conclusions: 'La fase inicial demostró buena respuesta del mercado local a las vacantes.',
                 createdAt: '2026-04-15T23:59:59.000Z'
             }
         ];
@@ -80,16 +80,14 @@
             const root = document.getElementById('root');
             if (!root) return;
             const view = window.appState.currentView;
-            
             if (view === 'login') root.innerHTML = LoginView();
             else if (view === 'list') root.innerHTML = ListView();
             else if (view === 'view') root.innerHTML = ReportView();
-            
             setupEventListeners();
         };
 
         const LoginView = () => `
-            <div class="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+            <div class="min-h-screen flex items-center justify-center bg-slate-100 p-4">
                 <div class="max-w-md w-full bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-gray-100 animate-fade-in">
                     <div class="p-12 text-center" style="background-color: ${COLORS.blue}">
                         <div class="bg-white p-3 rounded-full w-24 h-24 mx-auto mb-6 shadow-xl flex items-center justify-center border-4 border-[#158e45]">
@@ -100,15 +98,15 @@
                     </div>
                     <form id="loginForm" class="p-10 space-y-6">
                         <div class="space-y-1">
-                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Usuario de Coordinador</label>
-                            <input type="text" id="username" required class="w-full p-4 rounded-2xl bg-gray-50 border-none outline-none focus:ring-2 focus:ring-[#158e45] transition-all" placeholder="sjjardon">
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Usuario</label>
+                            <input type="text" id="username" required class="w-full p-4 rounded-2xl bg-gray-50 border-none outline-none focus:ring-2 focus:ring-[#158e45]" placeholder="Ingrese su usuario">
                         </div>
                         <div class="space-y-1">
                             <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Contraseña</label>
                             <input type="password" id="password" required class="w-full p-4 rounded-2xl bg-gray-50 border-none outline-none focus:ring-2 focus:ring-[#158e45]" placeholder="••••••••">
                         </div>
                         <div id="loginError" class="hidden text-red-500 text-xs font-bold text-center bg-red-50 p-3 rounded-xl"></div>
-                        <button type="submit" class="w-full py-5 rounded-2xl text-white font-black uppercase tracking-widest shadow-xl hover:brightness-110 active:scale-95 transition-all" style="background-color: ${COLORS.blue}">Ver Reportes</button>
+                        <button type="submit" class="w-full py-5 rounded-2xl text-white font-black uppercase tracking-widest shadow-xl hover:brightness-110" style="background-color: ${COLORS.blue}">Ver Reportes</button>
                     </form>
                 </div>
             </div>
@@ -131,7 +129,7 @@
                 <main class="max-w-7xl mx-auto p-8 space-y-10 animate-fade-in">
                     <div>
                         <h2 class="text-4xl font-black" style="color: ${COLORS.blue}">Bandeja de Resultados</h2>
-                        <p class="text-gray-400 font-medium">Revisión de informes generados por Elián Martinez.</p>
+                        <p class="text-gray-400 font-medium italic">Historial de informes generados por Elián Martinez.</p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         ${window.appState.reports.map((r) => `
@@ -140,7 +138,7 @@
                                 <h4 class="font-bold text-xl mb-1 line-clamp-1" style="color: ${COLORS.blue}">${r.reportTitle}</h4>
                                 <p class="text-[10px] text-gray-400 font-black uppercase mb-6">${new Date(r.createdAt).toLocaleDateString()}</p>
                                 <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-[#158e45] bg-green-50 px-3 py-2 rounded-full">
-                                    <span>Candidatos: ${r.results.toLocaleString()}</span>
+                                    <span>Postulantes: ${r.results.toLocaleString()}</span>
                                     <i class="fa-solid fa-eye ml-2 opacity-50"></i>
                                 </div>
                             </div>
@@ -155,31 +153,28 @@
             if (!r) return `<div class="p-20 text-center">Cargando reporte...</div>`;
             const formatDate = (dateStr) => new Date(dateStr + "T12:00:00").toLocaleDateString('es-GT', { day: 'numeric', month: 'long' });
             return `
-                <div class="bg-[#f0f4f8] min-h-screen pb-20 relative animate-fade-in font-sans">
-                    <div id="report-progress" style="position:fixed; top:0; left:0; height:6px; background:linear-gradient(to right, ${COLORS.green}, ${COLORS.blue}); width:0%; z-index:100;"></div>
+                <div class="bg-[#f0f4f8] min-h-screen pb-20 font-sans animate-fade-in">
                     <nav class="text-white p-4 shadow-xl sticky top-0 z-50 no-print" style="background-color: ${COLORS.blue}">
                         <div class="max-w-7xl mx-auto flex justify-between items-center">
-                            <button onclick="changeView('list')" class="font-black uppercase text-xs flex items-center gap-2 hover:opacity-70 transition-opacity"><i class="fa-solid fa-arrow-left"></i> Volver a la Bandeja</button>
+                            <button onclick="changeView('list')" class="font-black uppercase text-xs flex items-center gap-2"><i class="fa-solid fa-arrow-left"></i> Volver</button>
                             <div class="flex gap-3">
                                 <button onclick="celebrate()" class="bg-[#158e45] px-4 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg hover:scale-105 transition-transform"><i class="fa-solid fa-trophy mr-1"></i> Éxito</button>
                                 <button onclick="window.print()" class="bg-white/10 px-4 py-2 rounded-xl text-[10px] font-black uppercase border border-white/20"><i class="fa-solid fa-print"></i></button>
                             </div>
                         </div>
                     </nav>
-
                     <main class="max-w-6xl mx-auto px-4 py-12 space-y-20">
                         <div class="text-center space-y-4">
-                            <h2 class="text-5xl md:text-7xl font-black tracking-tight leading-tight" style="color: ${COLORS.blue}">Análisis de Resultados</h2>
-                            <p class="text-2xl text-gray-500 italic font-light mt-2">Campaña: <span class="font-bold text-[#158e45]">"${r.campaignName}"</span></p>
+                            <h2 class="text-5xl md:text-7xl font-black tracking-tight" style="color: ${COLORS.blue}">Análisis de Resultados</h2>
+                            <p class="text-2xl text-gray-500 italic">Campaña: <span class="font-bold text-[#158e45]">"${r.campaignName}"</span></p>
                             <div class="flex justify-center pt-4"><div class="h-2 w-48 rounded-full" style="background-color: ${COLORS.green}"></div></div>
                         </div>
 
-                        <!-- 1. Resumen Ejecutivo -->
                         <section class="bg-white rounded-[3rem] p-10 md:p-16 shadow-2xl border-l-[16px] relative overflow-hidden" style="border-left-color: ${COLORS.green}">
                             <div class="absolute -top-12 -right-12 opacity-5 w-80 h-80 rounded-full" style="background-color: ${COLORS.blue}"></div>
-                            <div class="grid md:grid-cols-5 gap-12 items-start relative z-10">
+                            <div class="grid md:grid-cols-5 gap-12 relative z-10">
                                 <div class="md:col-span-3 space-y-8">
-                                    <h3 class="text-4xl font-black tracking-tight" style="color: ${COLORS.blue}">Resumen Ejecutivo</h3>
+                                    <h3 class="text-4xl font-black" style="color: ${COLORS.blue}">Resumen Ejecutivo</h3>
                                     <div class="inline-flex items-center gap-4 text-white px-6 py-3 rounded-2xl shadow-xl" style="background-color: ${COLORS.blue}">
                                         <i class="fa-solid fa-calendar-check" style="color: ${COLORS.green}"></i>
                                         <span class="text-sm font-black uppercase tracking-widest">${formatDate(r.startDate)} — ${formatDate(r.endDate)}</span>
@@ -188,52 +183,52 @@
                                 </div>
                                 <div class="md:col-span-2 self-center">
                                     <div class="rounded-[2.5rem] p-8 text-white shadow-2xl" style="background-color: ${COLORS.blue}">
-                                        <div class="flex items-center gap-5 mb-8">
-                                            <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center p-2 shadow-lg">
-                                                <img src="LOGO COOSAJO SIN ESLOGAN.png" alt="Logo" class="object-contain" onerror="this.style.display='none'">
-                                            </div>
-                                            <div><p class="text-[10px] uppercase opacity-50 font-black tracking-widest">Canal</p><p class="text-lg font-black leading-none">Facebook Ads</p></div>
+                                        <div class="flex items-center gap-4 mb-6">
+                                            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center p-2"><img src="LOGO COOSAJO SIN ESLOGAN.png" alt="L"></div>
+                                            <p class="text-lg font-black leading-none uppercase tracking-widest">Facebook</p>
                                         </div>
                                         <div class="pt-4 border-t border-white/10 flex justify-between text-sm"><span>Estado:</span><span class="font-black text-green-300 uppercase">${r.status}</span></div>
-                                        <div class="pt-2 flex justify-between text-sm"><span>Inversión:</span><span class="font-black tracking-tight">Q ${r.investment}</span></div>
+                                        <div class="pt-2 flex justify-between text-sm"><span>Inversión:</span><span class="font-black">Q ${r.investment}</span></div>
                                     </div>
                                 </div>
                             </div>
                         </section>
 
-                        <!-- 2. Métricas Clave -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
                             ${MetricBoxHTML("Alcance Único", r.reach, "fa-users", COLORS.blue)}
-                            ${MetricBoxHTML("Postulantes", r.results, "fa-user-check", COLORS.green)}
+                            ${MetricBoxHTML("Interesados", r.results, "fa-user-check", COLORS.green)}
                             ${MetricBoxHTML("Costo Candidato", (r.investment/(r.results || 1)).toFixed(2), "fa-hand-holding-dollar", COLORS.blue, true)}
                         </div>
 
-                        <!-- 3. Analogía Visual -->
                         <section class="rounded-[4rem] p-12 md:p-20 text-white shadow-2xl relative overflow-hidden" style="background-color: ${COLORS.blue}">
-                            <div class="absolute -bottom-20 -right-20 p-10 opacity-5 rotate-12"><i class="fa-solid fa-users-rectangle text-[30rem]"></i></div>
-                            <h3 class="text-5xl font-black tracking-tight leading-tight text-center mb-16 relative z-10">La Analogía del Reclutador</h3>
-                            <div class="flex flex-col gap-4 items-center mb-16 relative z-10">
-                                <div class="bg-white/15 p-12 rounded-t-[5rem] text-center border-b border-white/5 w-full max-w-3xl shadow-2xl"><p class="text-[10px] font-black uppercase mb-1 text-green-300">Fase 1: El Alcance</p><p class="text-3xl font-black">${r.reach.toLocaleString()} personas vieron el anuncio</p></div>
-                                <div class="p-10 w-3/5 rounded-b-[4rem] shadow-2xl" style="background-color: ${COLORS.green}"><p class="text-[10px] font-black uppercase mb-1 text-white">Resultados Finales</p><p class="text-5xl font-black leading-none">${r.results.toLocaleString()} Postulantes</p></div>
-                            </div>
-                            <div class="bg-white/10 backdrop-blur-md rounded-[2.5rem] p-12 text-left space-y-6 relative z-10 border border-white/10">
-                                <p class="text-2xl italic font-light leading-relaxed">"Imagina que se ha colocado un módulo de reclutamiento con un gran cartel de <strong>'¡Contratando!'</strong> en una plaza local bastante concurrida."</p>
-                                <p class="text-gray-300 text-lg">El Alcance representa a todos los que pasaron por la plaza y voltearon a ver el anuncio. Sin embargo, los <strong>${r.results} interesados</strong> son quienes decidieron acercarse al módulo y preguntar: <span class="text-green-300 font-bold italic">"Me interesa esta plaza"</span>.</p>
+                            <div class="max-w-4xl mx-auto space-y-12 relative z-10 text-center">
+                                <h3 class="text-5xl font-black tracking-tight leading-tight">La Analogía del Reclutador</h3>
+                                <div class="flex flex-col gap-4 items-center mb-16">
+                                    <div class="bg-white/15 p-12 rounded-t-[5rem] text-center border-b border-white/5 w-full max-w-3xl shadow-2xl">
+                                        <p class="text-3xl font-black">${r.reach.toLocaleString()} personas vieron el anuncio</p>
+                                    </div>
+                                    <div class="p-10 w-3/5 rounded-b-[4rem] shadow-2xl" style="background-color: ${COLORS.green}">
+                                        <p class="text-5xl font-black leading-none">${r.results.toLocaleString()} Postulantes</p>
+                                    </div>
+                                </div>
+                                <div class="bg-white/10 backdrop-blur-md rounded-[2.5rem] p-12 text-left space-y-6 border border-white/10">
+                                    <p class="text-2xl italic font-light leading-relaxed">"Imagina que se ha colocado un módulo de reclutamiento con un gran cartel de <strong>'¡Contratando!'</strong> en una plaza local bastante concurrida."</p>
+                                    <p class="text-gray-300 text-lg">El Alcance representa a todos los que pasaron por la plaza y voltearon a ver el anuncio. Sin embargo, los <strong>${r.results} interesados</strong> son quienes decidieron acercarse al módulo y preguntar: <span class="text-green-300 font-bold italic">"Me interesa esta plaza"</span>.</p>
+                                </div>
                             </div>
                         </section>
 
-                        <!-- 4. Conclusión -->
                         <div class="bg-white rounded-[3rem] p-12 shadow-xl flex flex-col md:flex-row gap-10 items-center border border-gray-100 no-print">
                             <div class="w-24 h-24 rounded-full flex items-center justify-center text-white text-5xl shadow-lg shrink-0 animate-bounce-slow" style="background-color: ${COLORS.blue}"><i class="fa-solid fa-lightbulb"></i></div>
                             <div class="space-y-3">
-                                <h3 class="text-3xl font-black tracking-tight" style="color: ${COLORS.blue}">Conclusión Estratégica</h3>
+                                <h3 class="text-3xl font-black" style="color: ${COLORS.blue}">Conclusión Estratégica</h3>
                                 <p class="text-xl text-gray-600 font-light leading-relaxed">${r.conclusions}</p>
                             </div>
                         </div>
                     </main>
                     <footer class="bg-gray-900 text-white py-16 text-center">
                         <img src="LOGO COOSAJO SIN ESLOGAN.png" alt="Logo" class="h-16 mx-auto mb-6 bg-white p-2 rounded-full">
-                        <p class="text-xs opacity-50 uppercase tracking-[0.4em] font-black text-center">COOSAJO MICOOPE &copy; 2026</p>
+                        <p class="text-xs opacity-50 uppercase tracking-[0.4em] font-black">COOSAJO MICOOPE &copy; 2026</p>
                     </footer>
                 </div>
             `;
@@ -252,12 +247,15 @@
             if (loginForm) {
                 loginForm.addEventListener('submit', (e) => {
                     e.preventDefault();
-                    if (document.getElementById('username').value === 'sjjardon' && document.getElementById('password').value === 'Coosajo2041') {
+                    const u = document.getElementById('username').value;
+                    const p = document.getElementById('password').value;
+                    // Acceso permitido para ambos usuarios
+                    if ((u === 'sjjardon' || u === 'sjemartinez') && p === 'Coosajo2041') {
                         window.appState.currentView = 'list';
                         render();
                     } else {
                         const err = document.getElementById('loginError');
-                        err.textContent = 'Acceso Denegado: Verifique sus credenciales.';
+                        err.textContent = 'Usuario o contraseña incorrectos.';
                         err.classList.remove('hidden');
                     }
                 });
@@ -271,13 +269,6 @@
             window.appState.currentView = 'view';
             render();
             window.scrollTo(0,0);
-            setTimeout(() => {
-                window.onscroll = () => {
-                    const scrolled = (document.documentElement.scrollTop / (document.documentElement.scrollHeight - document.documentElement.clientHeight)) * 100;
-                    const pb = document.getElementById("report-progress");
-                    if(pb) pb.style.width = scrolled + "%";
-                };
-            }, 100);
         };
         window.celebrate = () => confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: [COLORS.green, COLORS.blue, '#ffffff'] });
 
@@ -285,14 +276,11 @@
             render();
             if (isFirebaseEnabled) {
                 try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
-                    else await signInAnonymously(auth);
-
+                    const resAuth = typeof __initial_auth_token !== 'undefined' ? await signInWithCustomToken(auth, __initial_auth_token) : await signInAnonymously(auth);
                     onAuthStateChanged(auth, (u) => {
                         if (u) {
                             onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'reports')), (snap) => {
                                 let dbData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                                // Sincronización en tiempo real: Base + DB
                                 const baseIds = INITIAL_REPORTS.map(r => r.id);
                                 const filteredDb = dbData.filter(d => !baseIds.includes(d.id));
                                 window.appState.reports = [...INITIAL_REPORTS, ...filteredDb];
