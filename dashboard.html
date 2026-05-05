@@ -14,8 +14,9 @@
         import { getFirestore, collection, onSnapshot, query, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // --- CONFIGURACIÓN FIREBASE (Sincronizada con index.html) ---
-        let firebaseConfig = null;
+        // --- CONFIGURACIÓN FIREBASE ---
+        // ¡ELIÁN! Aquí debes pegar la configuración de tu proyecto de Firebase para que se sincronice con el index.html en GitHub.
+        let firebaseConfig = null; 
         try {
             if (typeof __firebase_config !== 'undefined' && __firebase_config) {
                 firebaseConfig = JSON.parse(__firebase_config);
@@ -24,6 +25,7 @@
 
         let db, auth, appId;
         const isFirebaseEnabled = firebaseConfig !== null && firebaseConfig.apiKey;
+        
         if (isFirebaseEnabled) {
             const app = initializeApp(firebaseConfig);
             db = getFirestore(app);
@@ -33,28 +35,11 @@
 
         const COLORS = { blue: '#172e59', green: '#158e45' };
 
-        // --- REPORTES BASE (Sincronizados con el Portal Principal) ---
+        // --- LOS 2 REPORTES MAESTROS ---
         const INITIAL_REPORTS = [
             {
-                id: "reporte-el-chal",
-                reportTitle: 'Reporte Plaza el Chal',
-                campaignName: 'Plaza el Chal Petén',
-                startDate: '2026-04-01',
-                endDate: '2026-04-15',
-                reach: 10336,
-                results: 104,
-                investment: 293.54,
-                ctr: 1.01,
-                interactions: 19,
-                status: 'FINALIZADA',
-                executiveSummary: 'Este es un resumen de cómo le fue al anuncio, explicado de forma sencilla.\n\nLa campaña atrajo a dos grupos clave en diferentes etapas de compra:\n- Los 104 "Me Gusta" (Curiosos a futuro): Son como personas que miraron la vitrina y les agradó. Aunque quizás no compren hoy mismo, son prospectos a mediano plazo a los que se debe seguir atrayendo.\n- Los 19 Mensajes (Listos para la acción): Son quienes no solo vieron la vitrina, sino que abrieron la puerta y entraron a preguntar directamente. ¡Son oportunidades de venta inmediatas y "calientes"!\n\nAtraer a cada contacto costó aproximadamente Q2.82.',
-                conclusions: 'Con Q293.54 invertidos, se logró un excelente embudo de ventas:\n- Se atrajo la mirada de más de 10 mil personas.\n- Se consiguieron 104 prospectos para nutrir a futuro.\n- Se lograron 19 oportunidades directas de venta listas para negociar en este momento.',
-                analogyText: 'La Analogía: Es como repartir volantes en el parque central. El alcance significa que 10,336 personas distintas vieron el anuncio al menos una vez en sus pantallas. Es una excelente y masiva exposición inicial para el negocio.\n\nDe la multitud que vio el volante, 104 personas se detuvieron y mostraron interés real. Es como si anotaran sus nombres en un libro de visitas: ahora dan permiso para mostrarles más productos en el futuro.',
-                createdAt: '2026-04-15T23:59:59.000Z'
-            },
-            {
-                id: "reporte-ciudad-capital",
-                reportTitle: 'Reporte Plaza Ciudad Capital',
+                id: "reporte-abril-original",
+                reportTitle: 'Reporte de Plazas - Abril',
                 campaignName: '¡Estamos creciendo contigo!',
                 startDate: '2026-04-16',
                 endDate: '2026-04-30',
@@ -64,10 +49,25 @@
                 ctr: 6.49,
                 interactions: 469,
                 status: 'FINALIZADA',
-                executiveSummary: 'Resumen de rendimiento de la campaña enfocado en la generación de mensajes.\n\nEsta campaña fue un éxito rotundo en su objetivo principal: hacer que la gente hable con el negocio. Se dividen en dos grupos:\n- Los 244 Mensajes (Los usuarios Premium): Personas que ya abrieron la puerta para negociar. Es un volumen altísimo de clientes potenciales listos para cotizar y comprar. Son la prioridad número uno.\n- Las 469 Interacciones (Los que "guardaron la canción"): Además de los mensajes, el anuncio generó diversas reacciones y likes. Tienen a la marca en su radar.',
-                conclusions: 'Con una inversión muy baja de Q197.83, la campaña logró una rentabilidad impresionante:\n- Se expuso la marca a casi 9 mil personas.\n- Se generó interés secundario (reacciones y likes) para el futuro.\n- Lo más valioso: Se consiguieron 244 chats de ventas a un costo ridículamente bajo (Q0.81 cada uno). ¡Una campaña sumamente exitosa!',
-                analogyText: 'La Analogía (Spotify Gratis): Imaginemos que el anuncio es un comercial que suena en la versión gratuita de Spotify. El alcance significa que 8,932 oyentes distintos escucharon el mensaje de la marca mientras navegaban por sus redes.\n\nLa Analogía (El salto a Premium): De esos miles de oyentes, 244 personas decidieron "pasarse a Premium". Es decir, les interesó tanto el anuncio que decidieron invertir su tiempo en abrir un chat directo con el negocio. Convencerlos costó apenas Q0.81. ¡Muchísimo más barato y rentable que cualquier suscripción musical!',
+                executiveSummary: 'Análisis detallado de la campaña de reclutamiento finalizada en la región de Esquipulas. Durante este periodo de 15 días, la estrategia digital ha mantenido una eficiencia de costos sobresaliente para COOSAJO MICOOPE.',
+                conclusions: 'Se le recomienda que el equipo encargado de contactar a esos postulantes mantenga un protocolo ágil de contacto para capitalizar la inversión realizada.',
                 createdAt: '2026-04-30T23:59:59.000Z'
+            },
+            {
+                id: "reporte-fase-1",
+                reportTitle: 'Análisis de Atracción - Fase 1',
+                campaignName: '¡Estamos creciendo contigo! (Fase 1)',
+                startDate: '2026-04-01',
+                endDate: '2026-04-15',
+                reach: 7500,
+                results: 180,
+                investment: 150.00,
+                ctr: 5.80,
+                interactions: 320,
+                status: 'FINALIZADA',
+                executiveSummary: 'Este informe resume los esfuerzos iniciales de captación previos al cierre de mes. Se observó una tendencia positiva en la interacción local en las redes de Coosajo.',
+                conclusions: 'La fase inicial demostró que el mercado responde bien a los estímulos visuales directos y mensajes claros de empleo.',
+                createdAt: '2026-04-15T23:59:59.000Z'
             }
         ];
 
@@ -82,12 +82,15 @@
             const root = document.getElementById('root');
             if (!root) return;
             const view = window.appState.currentView;
+            
             if (view === 'login') root.innerHTML = LoginView();
             else if (view === 'list') root.innerHTML = ListView();
             else if (view === 'view') root.innerHTML = ReportView();
+            
             setupEventListeners();
         };
 
+        // --- VISTAS ---
         const LoginView = () => `
             <div class="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans">
                 <div class="max-w-md w-full bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-gray-100 animate-fade-in">
@@ -116,6 +119,11 @@
 
         const ListView = () => `
             <div class="min-h-screen bg-[#f8fafc] font-sans">
+                ${!isFirebaseEnabled ? `
+                <div class="bg-red-500 text-white text-center py-2 px-4 text-[10px] font-black uppercase tracking-widest shadow-md">
+                    <i class="fa-solid fa-triangle-exclamation mr-2"></i> MODO LOCAL: La base de datos no está conectada. Los reportes del Index no se sincronizarán aquí.
+                </div>
+                ` : ''}
                 <nav class="sticky top-0 z-50 text-white p-4 shadow-xl" style="background-color: ${COLORS.blue}">
                     <div class="max-w-7xl mx-auto flex justify-between items-center">
                         <div class="flex items-center gap-3 cursor-pointer" onclick="changeView('list')">
@@ -204,7 +212,7 @@
                                         <i class="fa-solid fa-calendar-check" style="color: ${COLORS.green}"></i>
                                         <span class="text-sm font-black uppercase tracking-widest">${formatDate(r.startDate)} — ${formatDate(r.endDate)}</span>
                                     </div>
-                                    <p class="text-gray-600 text-lg md:text-xl leading-relaxed font-light whitespace-pre-wrap">${r.executiveSummary}</p>
+                                    <p class="text-gray-600 text-xl leading-relaxed font-light whitespace-pre-wrap">${r.executiveSummary}</p>
                                 </div>
                                 <div class="md:col-span-2 self-center">
                                     <div class="rounded-[2.5rem] p-8 text-white shadow-2xl" style="background-color: ${COLORS.blue}">
@@ -236,8 +244,8 @@
                                 <div class="bg-white/15 p-12 rounded-t-[5rem] text-center border-b border-white/5 w-full max-w-3xl shadow-2xl"><p class="text-[10px] font-black uppercase mb-1 text-green-300">Fase 1: El Alcance</p><p class="text-3xl font-black">${r.reach.toLocaleString()} personas vieron el anuncio</p></div>
                                 <div class="p-10 w-3/5 rounded-b-[4rem] shadow-2xl" style="background-color: ${COLORS.green}"><p class="text-[10px] font-black uppercase mb-1 text-white">Resultados Finales</p><p class="text-5xl font-black leading-none">${r.results.toLocaleString()} Postulantes</p></div>
                             </div>
-                            <div class="bg-white/10 backdrop-blur-md rounded-[2.5rem] p-10 md:p-12 text-left space-y-6 relative z-10 border border-white/10">
-                                <p class="text-xl md:text-2xl font-light leading-relaxed whitespace-pre-wrap text-blue-50">${r.analogyText || `"Imagina que se ha colocado un módulo de reclutamiento con un gran cartel de '¡Contratando!' en una plaza local bastante concurrida."\n\nEl Alcance representa a todos los que pasaron por la plaza y voltearon a ver el anuncio. Sin embargo, los ${r.results} interesados son quienes decidieron acercarse al módulo y preguntar: "Me interesa esta plaza".`}</p>
+                            <div class="bg-white/10 backdrop-blur-md rounded-[2.5rem] p-12 text-left space-y-6 relative z-10 border border-white/10">
+                                <p class="text-xl italic font-light leading-relaxed whitespace-pre-wrap">${r.analogyText || `"Imagina que se ha colocado un módulo de reclutamiento con un gran cartel de '¡Contratando!' en una plaza local bastante concurrida."\n\nEl Alcance representa a todos los que pasaron por la plaza y voltearon a ver el anuncio. Sin embargo, los ${r.results} interesados son quienes decidieron acercarse al módulo y preguntar: "Me interesa esta plaza".`}</p>
                             </div>
                         </section>
 
@@ -272,10 +280,10 @@
             if (loginForm) {
                 loginForm.addEventListener('submit', (e) => {
                     e.preventDefault();
-                    const u = document.getElementById('username').value;
-                    const p = document.getElementById('password').value;
-                    // Acceso permitido para ambos usuarios
-                    if ((u === 'sjjardon' || u === 'sjemartinez') && p === 'Coosajo2041') {
+                    if (document.getElementById('username').value === 'sjjardon' && document.getElementById('password').value === 'Coosajo2041') {
+                        window.appState.currentView = 'list';
+                        render();
+                    } else if (document.getElementById('username').value === 'sjemartinez' && document.getElementById('password').value === 'Coosajo2041') {
                         window.appState.currentView = 'list';
                         render();
                     } else {
@@ -326,7 +334,7 @@
                                 window.appState.reports = [...INITIAL_REPORTS, ...filteredDb];
                                 window.appState.reports.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
                                 if (window.appState.currentView === 'list') render();
-                            }, (err) => { console.error("Permission error", err); });
+                            });
                         }
                     });
                 } catch (err) { console.error("Sync error", err); }
@@ -340,7 +348,6 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes bounce-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         .animate-bounce-slow { animation: bounce-slow 2s infinite ease-in-out; }
-        /* Permite saltos de linea en los textos generados */
         .whitespace-pre-wrap { white-space: pre-wrap; }
         @media print { .no-print { display: none !important; } nav { display: none !important; } }
     </style>
