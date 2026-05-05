@@ -14,44 +14,29 @@
         import { getFirestore, collection, addDoc, onSnapshot, query, doc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // --- CONFIGURACIÓN FIREBASE ---
-       // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+        // --- CONFIGURACIÓN FIREBASE DE ELIÁN (Lista para GitHub) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyACfn6C6_XqLDQI29f6uHUUwlCQkSCXNYk",
+            authDomain: "costos-comunicacion-digital.firebaseapp.com",
+            databaseURL: "https://costos-comunicacion-digital-default-rtdb.firebaseio.com",
+            projectId: "costos-comunicacion-digital",
+            storageBucket: "costos-comunicacion-digital.firebasestorage.app",
+            messagingSenderId: "299496606379",
+            appId: "1:299496606379:web:a4d6609ff79eebff0c85ee"
+        };
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyACfn6C6_XqLDQI29f6uHUUwlCQkSCXNYk",
-  authDomain: "costos-comunicacion-digital.firebaseapp.com",
-  databaseURL: "https://costos-comunicacion-digital-default-rtdb.firebaseio.com",
-  projectId: "costos-comunicacion-digital",
-  storageBucket: "costos-comunicacion-digital.firebasestorage.app",
-  messagingSenderId: "299496606379",
-  appId: "1:299496606379:web:a4d6609ff79eebff0c85ee",
-  measurementId: "G-D7GGDWSWKY"
-};
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = 'coosajo-prod-v6';
+        const isFirebaseEnabled = true;
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-
-        let db, auth, appId;
-        const isFirebaseEnabled = firebaseConfig !== null && firebaseConfig.apiKey;
-        if (isFirebaseEnabled) {
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-            appId = typeof __app_id !== 'undefined' ? __app_id : 'coosajo-prod-v6';
-        }
-
-        const apiKey = ""; 
+        // --- GEMINI API CONFIG ---
+        const apiKey = ""; // Clave inyectada por el entorno
         const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
         const COLORS = { blue: '#172e59', green: '#158e45' };
 
-        // --- DATOS BASE ---
+        // --- DATOS BASE (Los que me enviaste) ---
         const INITIAL_REPORTS = [
             {
                 id: "reporte-el-chal",
@@ -65,7 +50,7 @@ const analytics = getAnalytics(app);
                 ctr: 1.01,
                 interactions: 19,
                 status: 'FINALIZADA',
-                executiveSummary: 'Este es un resumen de cómo le fue al anuncio, explicado de forma sencilla.\n\nLa campaña atrajo a dos grupos clave en diferentes etapas de compra:\n- Los 104 "Me Gusta" (Curiosos a futuro): Son como personas que miraron la vitrina y les agradó. Aunque quizás no compren hoy mismo, son prospectos a mediano plazo a los que se debe seguir atrayendo.\n- Los 19 Mensajes (Listos para la acción): Son quienes no solo vieron la vitrina, sino que abrieron la puerta y entraron a preguntar directamente. ¡Son oportunidades de venta inmediatas y "calientes"!\n\nAtraer a cada contacto costó aproximadamente Q2.82.',
+                executiveSummary: 'Este es un resumen de cómo le fue al anuncio, explicado de forma sencilla.\n\nLa campaña atrajo a dos grupos clave en diferentes etapas de compra:\n- Los 104 "Me Gusta" (Curiosos a futuro): Son como personas que miraron la vitrina y les agradó. Aunque quizás no compren hoy mismo, son prospectos a mediano plazo a los que se debe seguir atrayendo con buen contenido.\n- Los 19 Mensajes (Listos para la acción): Son quienes no solo vieron la vitrina, sino que abrieron la puerta y entraron a la tienda a preguntar directamente. ¡Son oportunidades de venta inmediatas y "calientes"!\n\nAtraer a cada contacto costó aproximadamente Q2.82.',
                 conclusions: 'Con Q293.54 invertidos, se logró un excelente embudo de ventas:\n- Se atrajo la mirada de más de 10 mil personas.\n- Se consiguieron 104 prospectos para nutrir a futuro.\n- Se lograron 19 oportunidades directas de venta listas para negociar en este momento.',
                 analogyText: 'La Analogía: Es como repartir volantes en el parque central. El alcance significa que 10,336 personas distintas vieron el anuncio al menos una vez en sus pantallas. Es una excelente y masiva exposición inicial para el negocio.\n\nDe la multitud que vio el volante, 104 personas se detuvieron y mostraron interés real. Es como si anotaran sus nombres en un libro de visitas: ahora dan permiso para mostrarles más productos en el futuro.',
                 createdAt: '2026-04-15T23:59:59.000Z'
@@ -82,9 +67,9 @@ const analytics = getAnalytics(app);
                 ctr: 6.49,
                 interactions: 469,
                 status: 'FINALIZADA',
-                executiveSummary: 'Resumen de rendimiento de la campaña enfocado en la generación de mensajes.\n\nEsta campaña fue un éxito rotundo en su objetivo principal: hacer que la gente hable con el negocio. Se dividen en dos grupos:\n- Los 244 Mensajes (Los usuarios Premium): Personas que ya abrieron la puerta para negociar. Es un volumen altísimo de clientes potenciales listos para cotizar y comprar. Son la prioridad número uno.\n- Las 469 Interacciones (Los que "guardaron la canción"): Además de los mensajes, el anuncio generó diversas reacciones y likes. Tienen a la marca en su radar.',
+                executiveSummary: 'Resumen de rendimiento de la campaña enfocado en la generación de mensajes.\n\nEsta campaña fue un éxito rotundo en su objetivo principal: hacer que la gente hable con el negocio. Se dividen en dos grupos:\n- Los 244 Mensajes (Los usuarios Premium): Son 244 personas que ya abrieron la puerta para negociar. Es un volumen altísimo de clientes potenciales listos para preguntar, cotizar y comprar. Son la prioridad número uno.\n- Las 469 Interacciones (Los que "guardaron la canción"): Además de los mensajes, el anuncio generó 40 reacciones y 6 nuevos "Me gusta". Tienen a la marca en su radar.',
                 conclusions: 'Con una inversión muy baja de Q197.83, la campaña logró una rentabilidad impresionante:\n- Se expuso la marca a casi 9 mil personas.\n- Se generó interés secundario (reacciones y likes) para el futuro.\n- Lo más valioso: Se consiguieron 244 chats de ventas a un costo ridículamente bajo (Q0.81 cada uno). ¡Una campaña sumamente exitosa!',
-                analogyText: 'La Analogía (Spotify Gratis): Imaginemos que el anuncio es un comercial que suena en la versión gratuita de Spotify. El alcance significa que 8,932 oyentes distintos escucharon el mensaje de la marca mientras navegaban por sus redes.\n\nLa Analogía (El salto a Premium): De esos miles de oyentes, 244 personas decidieron "pasarse a Premium". Es decir, les interesó tanto el anuncio que decidieron invertir su tiempo en abrir un chat directo con el negocio. Convencerlos costó apenas Q0.81. ¡Muchísimo más barato y rentable que cualquier suscripción musical!',
+                analogyText: 'La Analogía (Spotify Gratis): Imaginemos que el anuncio es un comercial que suena en la versión gratuita de Spotify. El alcance significa que 8,932 oyentes distintos escucharon el mensaje de la marca mientras navegaban por sus redes. Es una excelente audiencia inicial.\n\nLa Analogía (El salto a Premium): De esos miles de oyentes, 244 personas decidieron "pasarse a Premium". Es decir, les interesó tanto el anuncio que decidieron invertir su tiempo en abrir un chat directo con el negocio. Convencerlos costó apenas Q0.81.',
                 createdAt: '2026-04-30T23:59:59.000Z'
             }
         ];
@@ -120,7 +105,7 @@ const analytics = getAnalytics(app);
             
             setupEventListeners();
 
-            // Llenar datos si estamos editando
+            // Cargar datos si se está editando
             if (view === 'create' && window.appState.editingReportId) {
                 const r = window.appState.reports.find(rep => rep.id === window.appState.editingReportId);
                 if (r) {
@@ -175,7 +160,7 @@ const analytics = getAnalytics(app);
                             </a>
                             <button onclick="changeView('create')" class="bg-[#158e45] px-5 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg hover:scale-105 transition-transform"><i class="fa-solid fa-plus mr-1"></i> Nuevo Informe</button>
                             <div class="h-6 w-px bg-white/20 mx-2"></div>
-                            <button onclick="changeView('config')" class="text-white/70 hover:text-white transition-colors" title="Configuración"><i class="fa-solid fa-gear"></i></button>
+                            <button onclick="changeView('config')" class="text-white/70 hover:text-white transition-colors" title="Configuración de Accesos"><i class="fa-solid fa-users-gear"></i></button>
                             <button onclick="logout()" class="text-white/70 hover:text-white transition-colors" title="Cerrar Sesión"><i class="fa-solid fa-right-from-bracket"></i></button>
                         </div>
                     </div>
@@ -208,12 +193,12 @@ const analytics = getAnalytics(app);
                 <nav class="text-white p-4 shadow-xl sticky top-0 z-50" style="background-color: ${COLORS.blue}">
                     <div class="max-w-7xl mx-auto flex items-center gap-4">
                         <button onclick="cancelEdit()" class="hover:opacity-70 transition-opacity"><i class="fa-solid fa-arrow-left"></i></button>
-                        <h1 class="font-black uppercase text-sm">${window.appState.editingReportId ? 'Modificar Informe' : 'Creación de Reporte Interactivo'}</h1>
+                        <h1 class="font-black uppercase text-sm">${window.appState.editingReportId ? 'Modificar Informe' : 'Creación de Reporte'}</h1>
                     </div>
                 </nav>
                 <main class="max-w-[90rem] mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
                     
-                    <!-- Formulario Estructurado y Guiado -->
+                    <!-- Formulario Guiado por Pasos -->
                     <div class="lg:col-span-2">
                         <div class="bg-white rounded-[3rem] shadow-xl p-8 md:p-12 border border-gray-100">
                             <form id="createForm" class="space-y-10">
@@ -242,7 +227,7 @@ const analytics = getAnalytics(app);
                                     </div>
                                     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                                         <div class="col-span-2"><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Alcance (Vistas)</label><input type="number" id="rep_reach" required class="w-full p-4 rounded-2xl bg-white border border-gray-200 outline-none" placeholder="0"></div>
-                                        <div class="col-span-2"><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Resultados (Chats)</label><input type="number" id="rep_res" required class="w-full p-4 rounded-2xl bg-white border border-gray-200 outline-none" placeholder="0"></div>
+                                        <div class="col-span-2"><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Resultados (Mensajes)</label><input type="number" id="rep_res" required class="w-full p-4 rounded-2xl bg-white border border-gray-200 outline-none" placeholder="0"></div>
                                         <div class="col-span-2 md:col-span-1"><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Interacciones</label><input type="number" id="rep_int" required class="w-full p-4 rounded-2xl bg-white border border-gray-200 outline-none" placeholder="0"></div>
                                     </div>
                                     <div class="grid grid-cols-2 gap-4">
@@ -259,12 +244,11 @@ const analytics = getAnalytics(app);
                                     </div>
                                     <div>
                                         <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Resumen Ejecutivo</label>
-                                        <p class="text-xs text-gray-400 ml-2 mb-2 italic">Explica el rendimiento general. Puedes usar guiones (-) para crear listas.</p>
-                                        <textarea id="rep_summary" required rows="5" class="w-full p-5 rounded-2xl bg-white border border-gray-200 outline-none focus:ring-2 focus:ring-[#158e45]" placeholder="Se presenta a usted el análisis detallado..."></textarea>
+                                        <textarea id="rep_summary" required rows="6" class="w-full p-5 rounded-2xl bg-white border border-gray-200 outline-none focus:ring-2 focus:ring-[#158e45]" placeholder="Este es un resumen de cómo le fue al anuncio..."></textarea>
                                     </div>
                                     <div>
                                         <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Conclusiones Estratégicas</label>
-                                        <textarea id="rep_conclusions" required rows="3" class="w-full p-5 rounded-2xl bg-white border border-gray-200 outline-none focus:ring-2 focus:ring-[#158e45]" placeholder="Se recomienda que el equipo..."></textarea>
+                                        <textarea id="rep_conclusions" required rows="4" class="w-full p-5 rounded-2xl bg-white border border-gray-200 outline-none focus:ring-2 focus:ring-[#158e45]" placeholder="Con la inversión realizada, se logró..."></textarea>
                                     </div>
                                 </div>
 
@@ -272,12 +256,12 @@ const analytics = getAnalytics(app);
                                 <div class="bg-gray-50/50 p-6 md:p-8 rounded-[2rem] border border-gray-100 space-y-6">
                                     <div class="flex items-center gap-3 mb-2">
                                         <div class="w-8 h-8 rounded-full flex items-center justify-center font-black text-white" style="background-color: ${COLORS.green}">4</div>
-                                        <h3 class="text-lg font-black" style="color: ${COLORS.blue}">Analogía del Reclutador (Opcional)</h3>
+                                        <h3 class="text-lg font-black" style="color: ${COLORS.blue}">La Analogía Visual (Personalizable)</h3>
                                     </div>
                                     <div>
-                                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Texto de Analogía Visual</label>
-                                        <p class="text-xs text-gray-400 ml-2 mb-2 italic">Si lo dejas en blanco, se usará la analogía predeterminada del "cartel en la plaza".</p>
-                                        <textarea id="rep_analogy" rows="4" class="w-full p-5 rounded-2xl bg-white border border-gray-200 outline-none focus:ring-2 focus:ring-[#158e45]" placeholder="La Analogía: Es como repartir volantes en el parque central..."></textarea>
+                                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Texto de Analogía</label>
+                                        <p class="text-xs text-gray-400 ml-2 mb-2 italic">Crea una metáfora fácil de entender. (Ej. Repartir volantes, Spotify gratis, etc.)</p>
+                                        <textarea id="rep_analogy" rows="5" class="w-full p-5 rounded-2xl bg-white border border-gray-200 outline-none focus:ring-2 focus:ring-[#158e45]" placeholder="La Analogía: Es como repartir volantes..."></textarea>
                                     </div>
                                 </div>
 
@@ -303,7 +287,7 @@ const analytics = getAnalytics(app);
 
                                 <div id="chatWindow" class="flex-grow bg-black/20 rounded-3xl p-5 overflow-y-auto space-y-4 mb-6 text-xs scrollbar-hide shadow-inner">
                                     <div class="bg-white/10 p-4 rounded-2xl rounded-tl-none max-w-[90%] border border-white/10 leading-relaxed italic text-[11px]">
-                                        ¡Hola Elián! Sube la captura de resultados de Facebook o dime los datos y yo extraeré los números y redactaré el análisis profesional y la analogía por ti.
+                                        ¡Hola Elián! Sube la captura de resultados de Facebook y yo extraeré los números, redactaré el análisis profesional y te crearé la analogía.
                                     </div>
                                     ${window.appState.aiChat.map(m => `
                                         <div class="${m.role === 'user' ? 'ml-auto bg-[#158e45] text-right rounded-tr-none' : 'bg-white/10 text-left rounded-tl-none'} p-4 rounded-2xl max-w-[90%] break-words text-[11px] leading-relaxed">
@@ -348,7 +332,7 @@ const analytics = getAnalytics(app);
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-xl border border-gray-100">
-                            <h3 class="font-black text-xl mb-6 flex items-center gap-3" style="color: ${COLORS.blue}"><i class="fa-solid fa-user-plus text-coosajo-green" style="color: ${COLORS.green}"></i> Nuevo Acceso</h3>
+                            <h3 class="font-black text-xl mb-6 flex items-center gap-3" style="color: ${COLORS.blue}"><i class="fa-solid fa-user-plus" style="color: ${COLORS.green}"></i> Nuevo Acceso</h3>
                             <form id="addUserForm" class="space-y-5">
                                 <div class="space-y-1">
                                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Nombre de Usuario</label>
@@ -362,7 +346,7 @@ const analytics = getAnalytics(app);
                                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Rol de Acceso</label>
                                     <select id="new_user_role" class="w-full p-4 rounded-2xl bg-gray-50 border outline-none focus:ring-2 focus:ring-[#158e45]">
                                         <option value="Admin">Administrador (Crea/Edita Reportes)</option>
-                                        <option value="Coordinador">Coordinador (Acceso al Dashboard)</option>
+                                        <option value="Coordinador">Coordinador (Acceso al Dashboard Solo Lectura)</option>
                                     </select>
                                 </div>
                                 <button type="submit" class="w-full py-5 rounded-2xl text-white font-black uppercase tracking-widest shadow-xl hover:brightness-110 active:scale-95 transition-all mt-4" style="background-color: ${COLORS.blue}">Crear Usuario</button>
@@ -370,7 +354,7 @@ const analytics = getAnalytics(app);
                         </div>
 
                         <div class="bg-white p-8 md:p-10 rounded-[3rem] shadow-xl border border-gray-100">
-                            <h3 class="font-black text-xl mb-6 flex items-center gap-3" style="color: ${COLORS.blue}"><i class="fa-solid fa-users text-coosajo-green" style="color: ${COLORS.green}"></i> Usuarios Activos</h3>
+                            <h3 class="font-black text-xl mb-6 flex items-center gap-3" style="color: ${COLORS.blue}"><i class="fa-solid fa-users" style="color: ${COLORS.green}"></i> Usuarios Activos</h3>
                             <div class="space-y-4">
                                 ${window.appState.users.map(u => `
                                     <div class="flex justify-between items-center p-5 bg-gray-50 rounded-2xl border border-gray-100 hover:shadow-md transition-all">
@@ -383,7 +367,7 @@ const analytics = getAnalytics(app);
                                                 <p class="text-[10px] text-gray-500 uppercase tracking-widest">${u.role}</p>
                                             </div>
                                         </div>
-                                        ${u.username !== 'sjemartinez' ? `<button onclick="deleteUser('${u.id}')" class="text-gray-300 hover:text-red-500 transition-colors p-2"><i class="fa-solid fa-trash-can"></i></button>` : '<span class="text-[9px] text-gray-300 uppercase font-bold">Maestro</span>'}
+                                        ${u.username !== 'sjemartinez' && u.username !== 'sjjardon' ? `<button onclick="deleteUser('${u.id}')" class="text-gray-300 hover:text-red-500 transition-colors p-2"><i class="fa-solid fa-trash-can"></i></button>` : '<span class="text-[9px] text-gray-300 uppercase font-bold">Base</span>'}
                                     </div>
                                 `).join('')}
                             </div>
@@ -412,7 +396,7 @@ const analytics = getAnalytics(app);
                     <main class="max-w-6xl mx-auto px-4 py-12 space-y-20">
                         <div class="text-center space-y-4">
                             <h2 class="text-5xl md:text-7xl font-black tracking-tight" style="color: ${COLORS.blue}">Análisis de Resultados</h2>
-                            <p class="text-2xl text-gray-500 italic font-light">Campaña: <span class="font-bold text-[#158e45]">"${r.campaignName}"</span></p>
+                            <p class="text-2xl text-gray-500 italic font-light mt-2">Campaña: <span class="font-bold text-[#158e45]">"${r.campaignName}"</span></p>
                             <div class="flex justify-center pt-4"><div class="h-2 w-48 rounded-full" style="background-color: ${COLORS.green}"></div></div>
                         </div>
 
@@ -442,7 +426,7 @@ const analytics = getAnalytics(app);
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
                             ${MetricBoxHTML("Alcance Único", r.reach, "fa-users", COLORS.blue)}
-                            ${MetricBoxHTML("Postulantes", r.results, "fa-user-check", COLORS.green)}
+                            ${MetricBoxHTML("Interesados", r.results, "fa-user-check", COLORS.green)}
                             ${MetricBoxHTML("Costo Candidato", (r.investment/(r.results || 1)).toFixed(2), "fa-hand-holding-dollar", COLORS.blue, true)}
                         </div>
 
@@ -466,7 +450,10 @@ const analytics = getAnalytics(app);
                             </div>
                         </div>
                     </main>
-                    <footer class="bg-gray-900 text-white py-16 text-center"><img src="LOGO COOSAJO SIN ESLOGAN.png" alt="Logo" class="h-16 mx-auto mb-6 bg-white p-2 rounded-full"><p class="text-xs opacity-50 uppercase tracking-[0.4em] font-black">Coosajo Micoope &copy; 2026</p></footer>
+                    <footer class="bg-gray-900 text-white py-16 text-center">
+                        <img src="LOGO COOSAJO SIN ESLOGAN.png" alt="Logo" class="h-16 mx-auto mb-6 bg-white p-2 rounded-full">
+                        <p class="text-xs opacity-50 uppercase tracking-[0.4em] font-black text-center">COOSAJO MICOOPE &copy; 2026</p>
+                    </footer>
                 </div>
             `;
         };
@@ -673,7 +660,18 @@ const analytics = getAnalytics(app);
             render();
             if (isFirebaseEnabled) {
                 try {
-                    const resAuth = typeof __initial_auth_token !== 'undefined' && __initial_auth_token ? await signInWithCustomToken(auth, __initial_auth_token) : await signInAnonymously(auth);
+                    // Intento de conexión robusta: Si el token del entorno falla, usa el Anónimo de tu Firebase
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        try {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } catch (e) {
+                            console.warn("Usando inicio de sesión anónimo (Token de entorno diferente al proyecto).", e);
+                            await signInAnonymously(auth);
+                        }
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+
                     onAuthStateChanged(auth, (u) => {
                         if (u) {
                             // Cargar reportes
