@@ -39,8 +39,25 @@
 
         const INITIAL_REPORTS = [
             {
-                id: "reporte-abril-original",
-                reportTitle: 'Reporte de Plazas - Abril',
+                id: "reporte-el-chal",
+                reportTitle: 'Reporte Plaza el Chal',
+                campaignName: 'Plaza el Chal Petén',
+                startDate: '2026-04-01',
+                endDate: '2026-04-15',
+                reach: 10336,
+                results: 104,
+                investment: 293.54,
+                ctr: 1.01,
+                interactions: 19,
+                status: 'FINALIZADA',
+                executiveSummary: 'Este es un resumen de cómo le fue al anuncio, explicado de forma sencilla.\n\nLa campaña atrajo a dos grupos clave en diferentes etapas de compra:\n- Los 104 "Me Gusta" (Curiosos a futuro): Son como personas que miraron la vitrina y les agradó. Aunque quizás no compren hoy mismo, son prospectos a mediano plazo a los que se debe seguir atrayendo.\n- Los 19 Mensajes (Listos para la acción): Son quienes no solo vieron la vitrina, sino que abrieron la puerta y entraron a preguntar directamente. ¡Son oportunidades de venta inmediatas y "calientes"!\n\nAtraer a cada contacto costó aproximadamente Q2.82.',
+                conclusions: 'Con Q293.54 invertidos, se logró un excelente embudo de ventas:\n- Se atrajo la mirada de más de 10 mil personas.\n- Se consiguieron 104 prospectos para nutrir a futuro.\n- Se lograron 19 oportunidades directas de venta listas para negociar en este momento.',
+                analogyText: 'La Analogía: Es como repartir volantes en el parque central. El alcance significa que 10,336 personas distintas vieron el anuncio al menos una vez en sus pantallas. Es una excelente y masiva exposición inicial para el negocio.\n\nDe la multitud que vio el volante, 104 personas se detuvieron y mostraron interés real. Es como si anotaran sus nombres en un libro de visitas: ahora dan permiso para mostrarles más productos en el futuro.',
+                createdAt: '2026-04-15T23:59:59.000Z'
+            },
+            {
+                id: "reporte-ciudad-capital",
+                reportTitle: 'Reporte Plaza Ciudad Capital',
                 campaignName: '¡Estamos creciendo contigo!',
                 startDate: '2026-04-16',
                 endDate: '2026-04-30',
@@ -50,25 +67,10 @@
                 ctr: 6.49,
                 interactions: 469,
                 status: 'FINALIZADA',
-                executiveSummary: 'Análisis detallado de la campaña de reclutamiento finalizada. Durante este periodo, la estrategia digital ha mantenido una eficiencia de costos sobresaliente.',
-                conclusions: 'Se recomienda mantener un protocolo ágil de contacto para capitalizar la inversión realizada.',
+                executiveSummary: 'Resumen de rendimiento de la campaña enfocado en la generación de mensajes.\n\nEsta campaña fue un éxito rotundo en su objetivo principal: hacer que la gente hable con el negocio. Se dividen en dos grupos:\n- Los 244 Mensajes (Los usuarios Premium): Personas que ya abrieron la puerta para negociar. Es un volumen altísimo de clientes potenciales listos para cotizar y comprar. Son la prioridad número uno.\n- Las 469 Interacciones (Los que "guardaron la canción"): Además de los mensajes, el anuncio generó diversas reacciones y likes. Tienen a la marca en su radar.',
+                conclusions: 'Con una inversión muy baja de Q197.83, la campaña logró una rentabilidad impresionante:\n- Se expuso la marca a casi 9 mil personas.\n- Se generó interés secundario (reacciones y likes) para el futuro.\n- Lo más valioso: Se consiguieron 244 chats de ventas a un costo ridículamente bajo (Q0.81 cada uno). ¡Una campaña sumamente exitosa!',
+                analogyText: 'La Analogía (Spotify Gratis): Imaginemos que el anuncio es un comercial que suena en la versión gratuita de Spotify. El alcance significa que 8,932 oyentes distintos escucharon el mensaje de la marca mientras navegaban por sus redes.\n\nLa Analogía (El salto a Premium): De esos miles de oyentes, 244 personas decidieron "pasarse a Premium". Es decir, les interesó tanto el anuncio que decidieron invertir su tiempo en abrir un chat directo con el negocio. Convencerlos costó apenas Q0.81. ¡Muchísimo más barato y rentable que cualquier suscripción musical!',
                 createdAt: '2026-04-30T23:59:59.000Z'
-            },
-            {
-                id: "reporte-fase-1",
-                reportTitle: 'Análisis de Atracción - Fase 1',
-                campaignName: '¡Estamos creciendo contigo! (Fase 1)',
-                startDate: '2026-04-01',
-                endDate: '2026-04-15',
-                reach: 7500,
-                results: 180,
-                investment: 150.00,
-                ctr: 5.80,
-                interactions: 320,
-                status: 'FINALIZADA',
-                executiveSummary: 'Informe de los esfuerzos iniciales de captación previos al cierre de mes.',
-                conclusions: 'La fase inicial demostró buena respuesta del mercado local a los estímulos visuales.',
-                createdAt: '2026-04-15T23:59:59.000Z'
             }
         ];
 
@@ -291,7 +293,7 @@
                                         <i class="fa-solid fa-calendar-check" style="color: ${COLORS.green}"></i>
                                         <span class="text-sm font-black uppercase tracking-widest">${formatDate(r.startDate)} — ${formatDate(r.endDate)}</span>
                                     </div>
-                                    <p class="text-gray-600 text-xl leading-relaxed font-light">${r.executiveSummary}</p>
+                                    <p class="text-gray-600 text-xl leading-relaxed font-light whitespace-pre-wrap">${r.executiveSummary}</p>
                                 </div>
                                 <div class="md:col-span-2 self-center">
                                     <div class="rounded-[2.5rem] p-8 text-white shadow-2xl" style="background-color: ${COLORS.blue}">
@@ -320,16 +322,16 @@
                                 <div class="p-10 w-3/5 rounded-b-[4rem] shadow-2xl" style="background-color: ${COLORS.green}"><p class="text-5xl font-black leading-none">${r.results.toLocaleString()} Postulantes</p></div>
                             </div>
                             <div class="bg-white/10 backdrop-blur-md rounded-[2.5rem] p-12 text-left space-y-6 relative z-10 border border-white/10">
-                                <p class="text-2xl italic font-light">"Imagina que se ha colocado un módulo de reclutamiento con un gran cartel de <strong>'¡Contratando!'</strong> en una plaza local bastante concurrida."</p>
-                                <p class="text-gray-300 text-lg">El Alcance representa a todos los que pasaron por la plaza y voltearon a ver el anuncio. Sin embargo, los <strong>${r.results} interesados</strong> son quienes decidieron acercarse al módulo y preguntar: <span class="text-green-300 font-bold italic">"Me interesa esta plaza"</span>.</p>
+                            <div class="bg-white/10 backdrop-blur-md rounded-3xl p-10 text-left space-y-6">
+                                <p class="text-xl italic font-light whitespace-pre-wrap text-gray-200">${r.analogyText || `"Imagina que se ha colocado un módulo de reclutamiento con un gran cartel de '¡Contratando!' en una plaza local bastante concurrida."\n\nEl Alcance representa a todos los que pasaron por la plaza y voltearon a ver el anuncio. Sin embargo, los ${r.results} interesados son quienes decidieron acercarse al módulo y preguntar: "Me interesa esta plaza".`}</p>
                             </div>
                         </section>
 
                         <div class="bg-white rounded-[3rem] p-12 shadow-xl flex flex-col md:flex-row gap-10 items-center border border-gray-100 no-print">
                             <div class="w-24 h-24 rounded-full flex items-center justify-center text-white text-5xl shadow-lg shrink-0 animate-bounce-slow" style="background-color: ${COLORS.blue}"><i class="fa-solid fa-lightbulb"></i></div>
-                            <div class="space-y-3">
+                            <div class="space-y-2">
                                 <h3 class="text-3xl font-black" style="color: ${COLORS.blue}">Conclusión Estratégica</h3>
-                                <p class="text-xl text-gray-600 font-light leading-relaxed">${r.conclusions}</p>
+                                <p class="text-xl text-gray-600 font-light leading-relaxed whitespace-pre-wrap">${r.conclusions}</p>
                             </div>
                         </div>
                     </main>
@@ -423,7 +425,14 @@
             if (createForm) {
                 createForm.addEventListener('submit', async (e) => {
                     e.preventDefault();
+                    let existingData = {};
+                    if (window.appState.editingReportId) {
+                        const existingReport = window.appState.reports.find(r => r.id === window.appState.editingReportId);
+                        if (existingReport) existingData = existingReport;
+                    }
+
                     const newReport = {
+                        ...existingData,
                         id: window.appState.editingReportId || ('rep-' + Date.now()),
                         reportTitle: document.getElementById('rep_title').value,
                         campaignName: document.getElementById('rep_camp').value,
@@ -436,7 +445,8 @@
                         interactions: Number(document.getElementById('rep_int').value),
                         executiveSummary: document.getElementById('rep_summary').value,
                         conclusions: document.getElementById('rep_conclusions').value,
-                        status: 'FINALIZADA', createdAt: new Date().toISOString()
+                        status: 'FINALIZADA', 
+                        createdAt: existingData.createdAt || new Date().toISOString()
                     };
                     if (isFirebaseEnabled && auth.currentUser) {
                         try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', newReport.id), newReport); } catch (err) { console.error(err); }
