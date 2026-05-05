@@ -14,48 +14,47 @@
         import { getFirestore, collection, onSnapshot, query, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // --- CONFIGURACIÓN FIREBASE ---
-        // ¡ELIÁN! Aquí debes pegar la configuración de tu proyecto de Firebase para que se sincronice con el index.html en GitHub.
-       // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+        // --- CONFIGURACIÓN FIREBASE DE ELIÁN ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyACfn6C6_XqLDQI29f6uHUUwlCQkSCXNYk",
+            authDomain: "costos-comunicacion-digital.firebaseapp.com",
+            databaseURL: "https://costos-comunicacion-digital-default-rtdb.firebaseio.com",
+            projectId: "costos-comunicacion-digital",
+            storageBucket: "costos-comunicacion-digital.firebasestorage.app",
+            messagingSenderId: "299496606379",
+            appId: "1:299496606379:web:a4d6609ff79eebff0c85ee"
+        };
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyACfn6C6_XqLDQI29f6uHUUwlCQkSCXNYk",
-  authDomain: "costos-comunicacion-digital.firebaseapp.com",
-  databaseURL: "https://costos-comunicacion-digital-default-rtdb.firebaseio.com",
-  projectId: "costos-comunicacion-digital",
-  storageBucket: "costos-comunicacion-digital.firebasestorage.app",
-  messagingSenderId: "299496606379",
-  appId: "1:299496606379:web:a4d6609ff79eebff0c85ee",
-  measurementId: "G-D7GGDWSWKY"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-
-        let db, auth, appId;
-        const isFirebaseEnabled = firebaseConfig !== null && firebaseConfig.apiKey;
-        
-        if (isFirebaseEnabled) {
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-            appId = typeof __app_id !== 'undefined' ? __app_id : 'coosajo-prod-v6';
-        }
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const appId = 'coosajo-prod-v6';
+        const isFirebaseEnabled = true;
 
         const COLORS = { blue: '#172e59', green: '#158e45' };
 
-        // --- LOS 2 REPORTES MAESTROS ---
+        // --- DATOS BASE (Sincronizados con el Index) ---
         const INITIAL_REPORTS = [
             {
-                id: "reporte-abril-original",
-                reportTitle: 'Reporte de Plazas - Abril',
+                id: "reporte-el-chal",
+                reportTitle: 'Reporte Plaza el Chal',
+                campaignName: 'Plaza el Chal Petén',
+                startDate: '2026-04-01',
+                endDate: '2026-04-15',
+                reach: 10336,
+                results: 104,
+                investment: 293.54,
+                ctr: 1.01,
+                interactions: 19,
+                status: 'FINALIZADA',
+                executiveSummary: 'Este es un resumen de cómo le fue al anuncio, explicado de forma sencilla.\n\nLa campaña atrajo a dos grupos clave en diferentes etapas de compra:\n- Los 104 "Me Gusta" (Curiosos a futuro): Son como personas que miraron la vitrina y les agradó. Aunque quizás no compren hoy mismo, son prospectos a mediano plazo a los que se debe seguir atrayendo con buen contenido.\n- Los 19 Mensajes (Listos para la acción): Son quienes no solo vieron la vitrina, sino que abrieron la puerta y entraron a la tienda a preguntar directamente. ¡Son oportunidades de venta inmediatas y "calientes"!\n\nAtraer a cada contacto costó aproximadamente Q2.82.',
+                conclusions: 'Con Q293.54 invertidos, se logró un excelente embudo de ventas:\n- Se atrajo la mirada de más de 10 mil personas.\n- Se consiguieron 104 prospectos para nutrir a futuro.\n- Se lograron 19 oportunidades directas de venta listas para negociar en este momento.',
+                analogyText: 'La Analogía: Es como repartir volantes en el parque central. El alcance significa que 10,336 personas distintas vieron el anuncio al menos una vez en sus pantallas. Es una excelente y masiva exposición inicial para el negocio.\n\nDe la multitud que vio el volante, 104 personas se detuvieron y mostraron interés real. Es como si anotaran sus nombres en un libro de visitas: ahora dan permiso para mostrarles más productos en el futuro.',
+                createdAt: '2026-04-15T23:59:59.000Z'
+            },
+            {
+                id: "reporte-ciudad-capital",
+                reportTitle: 'Reporte Plaza Ciudad Capital',
                 campaignName: '¡Estamos creciendo contigo!',
                 startDate: '2026-04-16',
                 endDate: '2026-04-30',
@@ -65,25 +64,10 @@ const analytics = getAnalytics(app);
                 ctr: 6.49,
                 interactions: 469,
                 status: 'FINALIZADA',
-                executiveSummary: 'Análisis detallado de la campaña de reclutamiento finalizada en la región de Esquipulas. Durante este periodo de 15 días, la estrategia digital ha mantenido una eficiencia de costos sobresaliente para COOSAJO MICOOPE.',
-                conclusions: 'Se le recomienda que el equipo encargado de contactar a esos postulantes mantenga un protocolo ágil de contacto para capitalizar la inversión realizada.',
+                executiveSummary: 'Resumen de rendimiento de la campaña enfocado en la generación de mensajes.\n\nEsta campaña fue un éxito rotundo en su objetivo principal: hacer que la gente hable con el negocio. Se dividen en dos grupos:\n- Los 244 Mensajes (Los usuarios Premium): Son 244 personas que ya abrieron la puerta para negociar. Es un volumen altísimo de clientes potenciales listos para preguntar, cotizar y comprar. Son la prioridad número uno.\n- Las 469 Interacciones (Los que "guardaron la canción"): Además de los mensajes, el anuncio generó 40 reacciones y 6 nuevos "Me gusta". Tienen a la marca en su radar.',
+                conclusions: 'Con una inversión muy baja de Q197.83, la campaña logró una rentabilidad impresionante:\n- Se expuso la marca a casi 9 mil personas.\n- Se generó interés secundario (reacciones y likes) para el futuro.\n- Lo más valioso: Se consiguieron 244 chats de ventas a un costo ridículamente bajo (Q0.81 cada uno). ¡Una campaña sumamente exitosa!',
+                analogyText: 'La Analogía (Spotify Gratis): Imaginemos que el anuncio es un comercial que suena en la versión gratuita de Spotify. El alcance significa que 8,932 oyentes distintos escucharon el mensaje de la marca mientras navegaban por sus redes. Es una excelente audiencia inicial.\n\nLa Analogía (El salto a Premium): De esos miles de oyentes, 244 personas decidieron "pasarse a Premium". Es decir, les interesó tanto el anuncio que decidieron invertir su tiempo en abrir un chat directo con el negocio. Convencerlos costó apenas Q0.81.',
                 createdAt: '2026-04-30T23:59:59.000Z'
-            },
-            {
-                id: "reporte-fase-1",
-                reportTitle: 'Análisis de Atracción - Fase 1',
-                campaignName: '¡Estamos creciendo contigo! (Fase 1)',
-                startDate: '2026-04-01',
-                endDate: '2026-04-15',
-                reach: 7500,
-                results: 180,
-                investment: 150.00,
-                ctr: 5.80,
-                interactions: 320,
-                status: 'FINALIZADA',
-                executiveSummary: 'Este informe resume los esfuerzos iniciales de captación previos al cierre de mes. Se observó una tendencia positiva en la interacción local en las redes de Coosajo.',
-                conclusions: 'La fase inicial demostró que el mercado responde bien a los estímulos visuales directos y mensajes claros de empleo.',
-                createdAt: '2026-04-15T23:59:59.000Z'
             }
         ];
 
@@ -98,15 +82,12 @@ const analytics = getAnalytics(app);
             const root = document.getElementById('root');
             if (!root) return;
             const view = window.appState.currentView;
-            
             if (view === 'login') root.innerHTML = LoginView();
             else if (view === 'list') root.innerHTML = ListView();
             else if (view === 'view') root.innerHTML = ReportView();
-            
             setupEventListeners();
         };
 
-        // --- VISTAS ---
         const LoginView = () => `
             <div class="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans">
                 <div class="max-w-md w-full bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-gray-100 animate-fade-in">
@@ -119,8 +100,8 @@ const analytics = getAnalytics(app);
                     </div>
                     <form id="loginForm" class="p-10 space-y-6">
                         <div class="space-y-1">
-                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Usuario de Coordinador</label>
-                            <input type="text" id="username" required class="w-full p-4 rounded-2xl bg-gray-50 border-none outline-none focus:ring-2 focus:ring-[#158e45] transition-all" placeholder="sjjardon">
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Usuario</label>
+                            <input type="text" id="username" required class="w-full p-4 rounded-2xl bg-gray-50 border-none outline-none focus:ring-2 focus:ring-[#158e45] transition-all" placeholder="Ingrese su usuario">
                         </div>
                         <div class="space-y-1">
                             <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Contraseña</label>
@@ -135,14 +116,9 @@ const analytics = getAnalytics(app);
 
         const ListView = () => `
             <div class="min-h-screen bg-[#f8fafc] font-sans">
-                ${!isFirebaseEnabled ? `
-                <div class="bg-red-500 text-white text-center py-2 px-4 text-[10px] font-black uppercase tracking-widest shadow-md">
-                    <i class="fa-solid fa-triangle-exclamation mr-2"></i> MODO LOCAL: La base de datos no está conectada. Los reportes del Index no se sincronizarán aquí.
-                </div>
-                ` : ''}
                 <nav class="sticky top-0 z-50 text-white p-4 shadow-xl" style="background-color: ${COLORS.blue}">
                     <div class="max-w-7xl mx-auto flex justify-between items-center">
-                        <div class="flex items-center gap-3 cursor-pointer" onclick="changeView('list')">
+                        <div class="flex items-center gap-3">
                             <img src="LOGO COOSAJO SIN ESLOGAN.png" alt="Logo" class="h-10 bg-white rounded-full p-1 border border-white">
                             <h1 class="font-black uppercase tracking-tighter text-lg hidden md:block">Panel de Coordinación</h1>
                         </div>
@@ -156,7 +132,7 @@ const analytics = getAnalytics(app);
                     <div class="border-b border-gray-200 pb-6 flex justify-between items-end">
                         <div>
                             <h2 class="text-4xl font-black" style="color: ${COLORS.blue}">Bandeja de Resultados</h2>
-                            <p class="text-gray-400 font-medium">Historial completo de atracción de talento generado por Elián Martinez.</p>
+                            <p class="text-gray-400 font-medium italic">Historial de informes generados por Elián Martinez.</p>
                         </div>
                         <div class="text-right hidden md:block">
                             <p class="text-[10px] font-black text-gray-300 uppercase tracking-widest">Responsable</p>
@@ -166,7 +142,7 @@ const analytics = getAnalytics(app);
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         ${window.appState.reports.map((r) => `
-                            <div onclick="openReport('${r.id}')" class="bg-white p-8 rounded-[3rem] shadow-sm hover:shadow-2xl transition-all cursor-pointer group relative border border-gray-100 overflow-hidden">
+                            <div onclick="openReport('${r.id}')" class="bg-white p-8 rounded-[3rem] shadow-sm hover:shadow-2xl transition-all cursor-pointer group border border-gray-100 relative overflow-hidden">
                                 <div class="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:bg-[#172e59] group-hover:text-white transition-all shadow-inner">
                                     <i class="fa-solid fa-chart-column"></i>
                                 </div>
@@ -228,14 +204,12 @@ const analytics = getAnalytics(app);
                                         <i class="fa-solid fa-calendar-check" style="color: ${COLORS.green}"></i>
                                         <span class="text-sm font-black uppercase tracking-widest">${formatDate(r.startDate)} — ${formatDate(r.endDate)}</span>
                                     </div>
-                                    <p class="text-gray-600 text-xl leading-relaxed font-light whitespace-pre-wrap">${r.executiveSummary}</p>
+                                    <p class="text-gray-600 text-lg md:text-xl leading-relaxed font-light whitespace-pre-wrap">${r.executiveSummary}</p>
                                 </div>
                                 <div class="md:col-span-2 self-center">
                                     <div class="rounded-[2.5rem] p-8 text-white shadow-2xl" style="background-color: ${COLORS.blue}">
-                                        <div class="flex items-center gap-5 mb-8">
-                                            <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center p-2 shadow-lg">
-                                                <img src="LOGO COOSAJO SIN ESLOGAN.png" alt="Logo" class="object-contain" onerror="this.src='https://placehold.co/100x100?text=COOSAJO'">
-                                            </div>
+                                        <div class="flex items-center gap-4 mb-6">
+                                            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center p-2 shadow-lg"><img src="LOGO COOSAJO SIN ESLOGAN.png" alt="Logo" onerror="this.style.display='none'"></div>
                                             <div><p class="text-[10px] uppercase opacity-50 font-black tracking-widest">Plataforma</p><p class="text-lg font-black leading-none">Facebook Ads</p></div>
                                         </div>
                                         <div class="pt-4 border-t border-white/10 flex justify-between text-sm"><span>Estado:</span><span class="font-black text-green-300 uppercase">${r.status}</span></div>
@@ -260,8 +234,8 @@ const analytics = getAnalytics(app);
                                 <div class="bg-white/15 p-12 rounded-t-[5rem] text-center border-b border-white/5 w-full max-w-3xl shadow-2xl"><p class="text-[10px] font-black uppercase mb-1 text-green-300">Fase 1: El Alcance</p><p class="text-3xl font-black">${r.reach.toLocaleString()} personas vieron el anuncio</p></div>
                                 <div class="p-10 w-3/5 rounded-b-[4rem] shadow-2xl" style="background-color: ${COLORS.green}"><p class="text-[10px] font-black uppercase mb-1 text-white">Resultados Finales</p><p class="text-5xl font-black leading-none">${r.results.toLocaleString()} Postulantes</p></div>
                             </div>
-                            <div class="bg-white/10 backdrop-blur-md rounded-[2.5rem] p-12 text-left space-y-6 relative z-10 border border-white/10">
-                                <p class="text-xl italic font-light leading-relaxed whitespace-pre-wrap">${r.analogyText || `"Imagina que se ha colocado un módulo de reclutamiento con un gran cartel de '¡Contratando!' en una plaza local bastante concurrida."\n\nEl Alcance representa a todos los que pasaron por la plaza y voltearon a ver el anuncio. Sin embargo, los ${r.results} interesados son quienes decidieron acercarse al módulo y preguntar: "Me interesa esta plaza".`}</p>
+                            <div class="bg-white/10 backdrop-blur-md rounded-[2.5rem] p-10 md:p-12 text-left space-y-6 relative z-10 border border-white/10">
+                                <p class="text-xl md:text-2xl font-light leading-relaxed whitespace-pre-wrap text-blue-50">${r.analogyText || `"Imagina que se ha colocado un módulo de reclutamiento con un gran cartel de '¡Contratando!' en una plaza local bastante concurrida."\n\nEl Alcance representa a todos los que pasaron por la plaza y voltearon a ver el anuncio. Sin embargo, los ${r.results} interesados son quienes decidieron acercarse al módulo y preguntar: "Me interesa esta plaza".`}</p>
                             </div>
                         </section>
 
@@ -296,10 +270,11 @@ const analytics = getAnalytics(app);
             if (loginForm) {
                 loginForm.addEventListener('submit', (e) => {
                     e.preventDefault();
-                    if (document.getElementById('username').value === 'sjjardon' && document.getElementById('password').value === 'Coosajo2041') {
-                        window.appState.currentView = 'list';
-                        render();
-                    } else if (document.getElementById('username').value === 'sjemartinez' && document.getElementById('password').value === 'Coosajo2041') {
+                    const u = document.getElementById('username').value;
+                    const p = document.getElementById('password').value;
+                    
+                    // Permitimos entrar a Elián o al Coordinador para ver
+                    if ((u === 'sjjardon' || u === 'sjemartinez') && p === 'Coosajo2041') {
                         window.appState.currentView = 'list';
                         render();
                     } else {
@@ -333,9 +308,14 @@ const analytics = getAnalytics(app);
             render();
             if (isFirebaseEnabled) {
                 try {
-                    // Primero Autenticar
+                    // Control robusto para login de Firebase: Si falla el token de entorno, usa el Anónimo de Firebase
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
+                        try {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } catch (e) {
+                            console.warn("Usando inicio de sesión anónimo (Token de entorno diferente al proyecto).", e);
+                            await signInAnonymously(auth);
+                        }
                     } else {
                         await signInAnonymously(auth);
                     }
@@ -350,7 +330,7 @@ const analytics = getAnalytics(app);
                                 window.appState.reports = [...INITIAL_REPORTS, ...filteredDb];
                                 window.appState.reports.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
                                 if (window.appState.currentView === 'list') render();
-                            });
+                            }, (err) => { console.error("Error al cargar reportes:", err); });
                         }
                     });
                 } catch (err) { console.error("Sync error", err); }
