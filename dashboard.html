@@ -14,7 +14,7 @@
         import { getFirestore, collection, onSnapshot, query, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // --- CONFIGURACIÓN FIREBASE ---
+        // --- CONFIGURACIÓN FIREBASE (Sincronizada con index.html) ---
         let firebaseConfig = null;
         try {
             if (typeof __firebase_config !== 'undefined' && __firebase_config) {
@@ -28,7 +28,7 @@
             const app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
-            // Sincronizado con el portal principal v6
+            // Mismo appId usado en el archivo index.html para compartir los datos
             appId = typeof __app_id !== 'undefined' ? __app_id : 'coosajo-prod-v6';
         }
 
@@ -48,7 +48,7 @@
                 ctr: 6.49,
                 interactions: 469,
                 status: 'FINALIZADA',
-                executiveSummary: 'Se presenta a usted el análisis detallado de la campaña de reclutamiento finalizada. Durante este periodo de 15 días, la estrategia digital ha mantenido una eficiencia de costos sobresaliente para COOSAJO MICOOPE.',
+                executiveSummary: 'Se presenta a usted el análisis detallado de la campaña de reclutamiento finalizada en la región de Esquipulas. Durante este periodo de 15 días, la estrategia digital ha mantenido una eficiencia de costos sobresaliente para COOSAJO MICOOPE.',
                 conclusions: 'Se le recomienda que el equipo encargado de contactar a esos postulantes mantenga un protocolo ágil de contacto para capitalizar la inversión realizada.',
                 createdAt: '2026-04-30T23:59:59.000Z'
             },
@@ -97,7 +97,7 @@
                         <div class="bg-white p-3 rounded-full w-24 h-24 mx-auto mb-6 shadow-xl flex items-center justify-center border-4 border-[#158e45]">
                             <img src="LOGO COOSAJO SIN ESLOGAN.png" alt="Logo" class="w-full h-full object-contain" onerror="this.src='https://placehold.co/100x100?text=COOSAJO'">
                         </div>
-                        <h2 class="text-white text-2xl font-black uppercase tracking-tight">Visor Ejecutivo</h2>
+                        <h2 class="text-white text-2xl font-black uppercase tracking-tight leading-tight">Visor Ejecutivo</h2>
                         <p class="text-white/50 text-[10px] font-bold tracking-[0.3em] uppercase mt-1">Coosajo Micoope | Coordinación</p>
                     </div>
                     <form id="loginForm" class="p-10 space-y-6">
@@ -120,7 +120,7 @@
             <div class="min-h-screen bg-[#f8fafc] font-sans">
                 <nav class="sticky top-0 z-50 text-white p-4 shadow-xl" style="background-color: ${COLORS.blue}">
                     <div class="max-w-7xl mx-auto flex justify-between items-center">
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-3 cursor-pointer" onclick="changeView('list')">
                             <img src="LOGO COOSAJO SIN ESLOGAN.png" alt="Logo" class="h-10 bg-white rounded-full p-1 border border-white">
                             <h1 class="font-black uppercase tracking-tighter text-lg hidden md:block">Panel de Coordinación</h1>
                         </div>
@@ -134,7 +134,7 @@
                     <div class="border-b border-gray-200 pb-6 flex justify-between items-end">
                         <div>
                             <h2 class="text-4xl font-black" style="color: ${COLORS.blue}">Bandeja de Resultados</h2>
-                            <p class="text-gray-400 font-medium">Historial completo de atracción de talento.</p>
+                            <p class="text-gray-400 font-medium">Historial completo de atracción de talento generado por Elián Martinez.</p>
                         </div>
                         <div class="text-right hidden md:block">
                             <p class="text-[10px] font-black text-gray-300 uppercase tracking-widest">Responsable</p>
@@ -212,7 +212,7 @@
                                     <div class="rounded-[2.5rem] p-8 text-white shadow-2xl" style="background-color: ${COLORS.blue}">
                                         <div class="flex items-center gap-5 mb-8">
                                             <div class="w-14 h-14 bg-white rounded-full flex items-center justify-center p-2 shadow-lg">
-                                                <img src="LOGO COOSAJO SIN ESLOGAN.png" alt="Logo" class="object-contain" onerror="this.style.display='none'">
+                                                <img src="LOGO COOSAJO SIN ESLOGAN.png" alt="Logo" class="object-contain" onerror="this.src='https://placehold.co/100x100?text=COOSAJO'">
                                             </div>
                                             <div><p class="text-[10px] uppercase opacity-50 font-black tracking-widest">Plataforma</p><p class="text-lg font-black leading-none">Facebook Ads</p></div>
                                         </div>
@@ -226,7 +226,7 @@
                         <!-- 2. Métricas Clave -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
                             ${MetricBoxHTML("Alcance Único", r.reach, "fa-users", COLORS.blue)}
-                            ${MetricBoxHTML("Interesados", r.results, "fa-user-check", COLORS.green)}
+                            ${MetricBoxHTML("Postulantes", r.results, "fa-user-check", COLORS.green)}
                             ${MetricBoxHTML("Costo Candidato", (r.investment/(r.results || 1)).toFixed(2), "fa-hand-holding-dollar", COLORS.blue, true)}
                         </div>
 
@@ -255,7 +255,7 @@
                     </main>
                     <footer class="bg-gray-900 text-white py-16 text-center">
                         <img src="LOGO COOSAJO SIN ESLOGAN.png" alt="Logo" class="h-16 mx-auto mb-6 bg-white p-2 rounded-full">
-                        <p class="text-xs opacity-50 uppercase tracking-[0.4em] font-black">COOSAJO MICOOPE &copy; 2026</p>
+                        <p class="text-xs opacity-50 uppercase tracking-[0.4em] font-black text-center">COOSAJO MICOOPE &copy; 2026</p>
                     </footer>
                 </div>
             `;
@@ -309,8 +309,12 @@
             render();
             if (isFirebaseEnabled) {
                 try {
-                    if (typeof __initial_auth_token !== 'undefined') await signInWithCustomToken(auth, __initial_auth_token);
-                    else await signInAnonymously(auth);
+                    // Primero Autenticar
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
 
                     onAuthStateChanged(auth, (u) => {
                         if (u) {
@@ -322,7 +326,7 @@
                                 window.appState.reports = [...INITIAL_REPORTS, ...filteredDb];
                                 window.appState.reports.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
                                 if (window.appState.currentView === 'list') render();
-                            });
+                            }, (err) => { console.error("Permission error", err); });
                         }
                     });
                 } catch (err) { console.error("Sync error", err); }
