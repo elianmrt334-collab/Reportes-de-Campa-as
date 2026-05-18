@@ -583,15 +583,28 @@
                         createdAt: existingData.createdAt || new Date().toISOString()
                     };
                     
-                    if (isFirebaseEnabled && auth.currentUser) {
-                        try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', newReport.id), newReport); } catch (err) { console.error(err); }
+                    // --- SOLUCIÓN APLICADA AQUÍ ---
+                    // 1. Guardar siempre de forma local primero (Actualización Optimista)
+                    if (window.appState.editingReportId) {
+                        const idx = window.appState.reports.findIndex(r => r.id === window.appState.editingReportId);
+                        window.appState.reports[idx] = newReport;
                     } else {
-                        if (window.appState.editingReportId) {
-                            const idx = window.appState.reports.findIndex(r => r.id === window.appState.editingReportId);
-                            window.appState.reports[idx] = newReport;
-                        } else window.appState.reports.unshift(newReport);
+                        window.appState.reports.unshift(newReport);
                     }
-                    window.appState.editingReportId = null; window.appState.currentView = 'list'; render();
+
+                    // 2. Intentar respaldarlo en la nube en Firebase
+                    if (isFirebaseEnabled && auth.currentUser) {
+                        try { 
+                            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', newReport.id), newReport); 
+                        } catch (err) { 
+                            console.error("Firebase no dejó guardar. Mostrando datos locales. Error:", err); 
+                            alert("Nota: Firebase ha denegado la escritura por problemas de permisos en las reglas. Se ha guardado en tu pantalla actual de forma temporal.");
+                        }
+                    }
+                    
+                    window.appState.editingReportId = null; 
+                    window.appState.currentView = 'list'; 
+                    render();
                 });
             }
 
@@ -606,12 +619,18 @@
                         role: document.getElementById('new_user_role').value
                     };
                     
+                    // Optimistic update para los usuarios también
+                    window.appState.users.push(newUser);
+                    
                     if (isFirebaseEnabled && auth.currentUser) {
-                        try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', newUser.id), newUser); } catch (err) { console.error(err); }
-                    } else {
-                        window.appState.users.push(newUser);
+                        try { 
+                            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', newUser.id), newUser); 
+                        } catch (err) { 
+                            console.error(err); 
+                            alert("Usuario creado de forma temporal en tu sesión actual.");
+                        }
                     }
-                    render(); // Refrescar vista
+                    render();
                 });
             }
 
@@ -642,15 +661,27 @@
         window.deleteReport = async (e, id) => { 
             e.stopPropagation(); 
             if(confirm("¿Eliminar este reporte permanentemente?")) { 
-                if (isFirebaseEnabled && auth.currentUser) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', id)); 
-                else { window.appState.reports = window.appState.reports.filter(r => r.id !== id); render(); } 
+                // Eliminar localmente primero (Optimistic update)
+                window.appState.reports = window.appState.reports.filter(r => r.id !== id); 
+                render();
+
+                if (isFirebaseEnabled && auth.currentUser) {
+                    try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', id)); }
+                    catch(err){ console.error(err); }
+                }
             } 
         };
 
         window.deleteUser = async (id) => {
             if(confirm("¿Eliminar usuario?")) {
-                if (isFirebaseEnabled && auth.currentUser) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', id));
-                else { window.appState.users = window.appState.users.filter(u => u.id !== id); render(); }
+                // Eliminar localmente primero (Optimistic update)
+                window.appState.users = window.appState.users.filter(u => u.id !== id); 
+                render();
+
+                if (isFirebaseEnabled && auth.currentUser) {
+                    try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', id)); }
+                    catch(err){ console.error(err); }
+                }
             }
         };
 
@@ -682,6 +713,8 @@
                                 window.appState.reports = [...INITIAL_REPORTS, ...filteredDb];
                                 window.appState.reports.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
                                 if (window.appState.currentView === 'list') render();
+                            }, (error) => {
+                                console.warn("Permiso denegado por Firebase para leer reportes. Usando datos locales.", error.message);
                             });
                             // Cargar usuarios
                             onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'users')), (snap) => {
@@ -690,6 +723,8 @@
                                 const filteredDb = dbData.filter(d => !baseIds.includes(d.id));
                                 window.appState.users = [...INITIAL_USERS, ...filteredDb];
                                 if (window.appState.currentView === 'config') render();
+                            }, (error) => {
+                                console.warn("Permiso denegado por Firebase para leer usuarios. Usando datos locales.", error.message);
                             });
                         }
                     });
