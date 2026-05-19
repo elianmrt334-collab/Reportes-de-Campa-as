@@ -55,8 +55,36 @@
         const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
         const COLORS = { blue: '#172e59', green: '#158e45', lightBlue: '#eef2f9', red: '#ef4444', orange: '#f97316' };
 
-        // --- DATOS BASE (Incluyendo ejemplo PDF) ---
+        // --- DATOS BASE ---
         const INITIAL_REPORTS = [
+            {
+                id: "reporte-chamgua-saludo",
+                reportTitle: 'Análisis de Rendimiento: Campaña "Chamgua saludo 2026"',
+                campaignName: 'Chamgua saludo 2026',
+                startDate: '2026-05-10',
+                endDate: '2026-05-18',
+                reach: 4354,
+                impressions: 10935,
+                results: 161, 
+                secondaryResults: 85, 
+                secondaryResultsLabel: 'Reacciones',
+                investment: 99.25, 
+                costPerResult: 0.62,
+                demoTop1Age: '',
+                demoTop1Desc: '',
+                demoTop2Age: '',
+                demoTop2Desc: '',
+                status: 'FINALIZADA',
+                executiveSummary: 'La campaña "Chamgua saludo 2026" se ejecutó con un enfoque altamente eficiente en micro-presupuesto. Con una inversión mínima de Q99.25, se logró mantener la presencia de marca activa, alcanzando a más de 4,300 personas y generando 10,935 impactos visuales. El objetivo principal de generar interacciones (engagement) se cumplió con éxito.',
+                conclusions: 'El costo por interacción de Q0.62 es un indicador de que el contenido gráfico/textual fue altamente relevante para el público. La frecuencia de 2.51 es perfecta para generar presencia de marca sin fatigar. Un CTR del 3.21% y 85 reacciones confirman un sentimiento cálido y receptivo hacia la marca.',
+                analogyText: 'Logramos el equivalente digital a entregarle en mano una tarjeta de presentación y un saludo afectuoso a un cliente potencial, fortaleciendo el lazo con la marca "Chamgua". Multiplicado por nuestro presupuesto (lo que costaría un par de almuerzos), logramos que toda una comunidad nos tuviera presentes en sus pantallas más de 10,000 veces.',
+                costAnalogyText: 'Conseguir que una persona se detuviera, leyera nuestro mensaje de saludo 2026 y decidiera interactuar, nos costó apenas Q0.62. Esencialmente, pagamos el equivalente a lo que cuesta comprar un solo chicle o un pequeño dulce de menta en la tienda de la esquina.',
+                urgentObs: '',
+                urgentRec: '',
+                missedOppRate: 0,
+                createdAt: '2026-05-18T10:00:00.000Z',
+                reportImage: null
+            },
             {
                 id: "reporte-remesas-pdf",
                 reportTitle: 'Análisis de Resultados: Campaña de Remesas',
@@ -65,10 +93,10 @@
                 endDate: '2026-05-15',
                 reach: 92958,
                 impressions: 134486,
-                results: 214, // Mensajes Recibidos
-                secondaryResults: 70, // Mensajes Contestados
+                results: 214,
+                secondaryResults: 70, 
                 secondaryResultsLabel: 'Mensajes Contestados',
-                investment: 1416.68, // (214 * 6.62 to match PDF math logically)
+                investment: 1416.68,
                 costPerResult: 6.62,
                 demoTop1Age: '25 - 34 años',
                 demoTop1Desc: 'Tanto hombres como mujeres jóvenes trabajadores pendientes de recibir el dinero de sus familiares para gastos del hogar o proyectos propios.',
