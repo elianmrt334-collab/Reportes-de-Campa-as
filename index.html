@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         * { font-family: 'Poppins', sans-serif; }
@@ -190,7 +191,10 @@
             if (view === 'login') root.innerHTML = LoginView();
             else if (view === 'list') root.innerHTML = ListView();
             else if (view === 'create') root.innerHTML = CreateView();
-            else if (view === 'view') root.innerHTML = ReportView();
+            else if (view === 'view') {
+                root.innerHTML = ReportView();
+                setTimeout(() => window.initCharts && window.initCharts(window.appState.selectedReport), 100);
+            }
             else if (view === 'config') root.innerHTML = ConfigView();
             
             setupEventListeners();
@@ -528,6 +532,13 @@
                                     <p class="text-5xl font-black text-gray-700 mt-2">${Number(r.secondaryResults).toLocaleString()}</p>
                                 </div>` : ''}
                             </div>
+                            
+                            <div class="mt-8 pt-8 border-t border-gray-100">
+                                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 text-center">Embudo de Conversión Visual</p>
+                                <div class="h-64 w-full">
+                                    <canvas id="funnelChart"></canvas>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- SLIDE 4: EDADES (Si existe) -->
@@ -778,6 +789,41 @@
                 if (preview) { preview.src = re.target.result; preview.classList.remove('hidden'); }
             };
             reader.readAsDataURL(file);
+        };
+
+        window.initCharts = (r) => {
+            if (!r) return;
+            if (window.funnelChartInst) window.funnelChartInst.destroy();
+            
+            const ctx = document.getElementById('funnelChart');
+            if (ctx) {
+                const labels = ['Alcanzados (Vistas)', 'Interesados (Resultados)', r.secondaryResultsLabel || 'Conversión Sec.'];
+                const data = [r.reach, r.results, r.secondaryResults || 0];
+                
+                window.funnelChartInst = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: ['#eef2f9', '#172e59', '#158e45'],
+                            borderRadius: 10,
+                            barPercentage: 0.6
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false }, tooltip: { bodyFont: { family: 'Poppins' } } },
+                        scales: { 
+                            x: { display: false, grid: { display: false } }, 
+                            y: { grid: { display: false }, border: { display: false }, ticks: { font: { family: 'Poppins', weight: 'bold', size: 12 } } } 
+                        },
+                        animation: { duration: 1500, easing: 'easeOutQuart' }
+                    }
+                });
+            }
         };
 
         const init = async () => {
