@@ -9,12 +9,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
+    <style>
+        * { font-family: 'Poppins', sans-serif; }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes bounce-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .animate-bounce-slow { animation: bounce-slow 2s infinite ease-in-out; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        /* Permite saltos de linea en los textos generados */
+        .whitespace-pre-wrap { white-space: pre-wrap; }
+        @media print { .no-print { display: none !important; } nav { display: none !important; } }
+    </style>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, doc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // --- CONFIGURACIÓN FIREBASE DE ELIÁN (Lista para GitHub) ---
+        // --- CONFIGURACIÓN FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyACfn6C6_XqLDQI29f6uHUUwlCQkSCXNYk",
             authDomain: "costos-comunicacion-digital.firebaseapp.com",
@@ -36,7 +48,7 @@
         const GEMINI_MODEL = "gemini-2.5-flash-preview-09-2025";
         const COLORS = { blue: '#172e59', green: '#158e45' };
 
-        // --- DATOS BASE (Los que me enviaste) ---
+        // --- DATOS BASE ---
         const INITIAL_REPORTS = [
             {
                 id: "reporte-el-chal",
@@ -53,7 +65,8 @@
                 executiveSummary: 'Este es un resumen de cómo le fue al anuncio, explicado de forma sencilla.\n\nLa campaña atrajo a dos grupos clave en diferentes etapas de compra:\n- Los 104 "Me Gusta" (Curiosos a futuro): Son como personas que miraron la vitrina y les agradó. Aunque quizás no compren hoy mismo, son prospectos a mediano plazo a los que se debe seguir atrayendo con buen contenido.\n- Los 19 Mensajes (Listos para la acción): Son quienes no solo vieron la vitrina, sino que abrieron la puerta y entraron a la tienda a preguntar directamente. ¡Son oportunidades de venta inmediatas y "calientes"!\n\nAtraer a cada contacto costó aproximadamente Q2.82.',
                 conclusions: 'Con Q293.54 invertidos, se logró un excelente embudo de ventas:\n- Se atrajo la mirada de más de 10 mil personas.\n- Se consiguieron 104 prospectos para nutrir a futuro.\n- Se lograron 19 oportunidades directas de venta listas para negociar en este momento.',
                 analogyText: 'La Analogía: Es como repartir volantes en el parque central. El alcance significa que 10,336 personas distintas vieron el anuncio al menos una vez en sus pantallas. Es una excelente y masiva exposición inicial para el negocio.\n\nDe la multitud que vio el volante, 104 personas se detuvieron y mostraron interés real. Es como si anotaran sus nombres en un libro de visitas: ahora dan permiso para mostrarles más productos en el futuro.',
-                createdAt: '2026-04-15T23:59:59.000Z'
+                createdAt: '2026-04-15T23:59:59.000Z',
+                reportImage: null
             },
             {
                 id: "reporte-ciudad-capital",
@@ -70,7 +83,8 @@
                 executiveSummary: 'Resumen de rendimiento de la campaña enfocado en la generación de mensajes.\n\nEsta campaña fue un éxito rotundo en su objetivo principal: hacer que la gente hable con el negocio. Se dividen en dos grupos:\n- Los 244 Mensajes (Los usuarios Premium): Son 244 personas que ya abrieron la puerta para negociar. Es un volumen altísimo de clientes potenciales listos para preguntar, cotizar y comprar. Son la prioridad número uno.\n- Las 469 Interacciones (Los que "guardaron la canción"): Además de los mensajes, el anuncio generó 40 reacciones y 6 nuevos "Me gusta". Tienen a la marca en su radar.',
                 conclusions: 'Con una inversión muy baja de Q197.83, la campaña logró una rentabilidad impresionante:\n- Se expuso la marca a casi 9 mil personas.\n- Se generó interés secundario (reacciones y likes) para el futuro.\n- Lo más valioso: Se consiguieron 244 chats de ventas a un costo ridículamente bajo (Q0.81 cada uno). ¡Una campaña sumamente exitosa!',
                 analogyText: 'La Analogía (Spotify Gratis): Imaginemos que el anuncio es un comercial que suena en la versión gratuita de Spotify. El alcance significa que 8,932 oyentes distintos escucharon el mensaje de la marca mientras navegaban por sus redes. Es una excelente audiencia inicial.\n\nLa Analogía (El salto a Premium): De esos miles de oyentes, 244 personas decidieron "pasarse a Premium". Es decir, les interesó tanto el anuncio que decidieron invertir su tiempo en abrir un chat directo con el negocio. Convencerlos costó apenas Q0.81.',
-                createdAt: '2026-04-30T23:59:59.000Z'
+                createdAt: '2026-04-30T23:59:59.000Z',
+                reportImage: null
             }
         ];
 
@@ -86,6 +100,7 @@
             currentView: 'login',
             selectedReport: null,
             editingReportId: null,
+            currentReportImage: null, // Nuevo estado para la imagen
             aiLoading: false,
             aiChat: [],
             lastAnalyzedImage: null
@@ -121,6 +136,16 @@
                     document.getElementById('rep_summary').value = r.executiveSummary || '';
                     document.getElementById('rep_conclusions').value = r.conclusions || '';
                     document.getElementById('rep_analogy').value = r.analogyText || '';
+                    
+                    // Cargar vista previa de la imagen si existe
+                    if (r.reportImage) {
+                        window.appState.currentReportImage = r.reportImage;
+                        const preview = document.getElementById('rep_image_preview');
+                        if (preview) {
+                            preview.src = r.reportImage;
+                            preview.classList.remove('hidden');
+                        }
+                    }
                 }
             }
         };
@@ -170,7 +195,10 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         ${window.appState.reports.map((r) => `
                             <div onclick="openReport('${r.id}')" class="bg-white p-8 rounded-[2.5rem] shadow-sm hover:shadow-2xl transition-all cursor-pointer group relative border border-gray-50 overflow-hidden">
-                                <div class="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-2xl mb-6" style="color: ${COLORS.green}"><i class="fa-solid fa-file-waveform"></i></div>
+                                ${r.reportImage 
+                                    ? `<div class="w-14 h-14 rounded-2xl mb-6 bg-cover bg-center border border-gray-100 shadow-sm" style="background-image: url('${r.reportImage}')"></div>` 
+                                    : `<div class="w-14 h-14 bg-gray-50 rounded-2xl flex items-center justify-center text-2xl mb-6" style="color: ${COLORS.green}"><i class="fa-solid fa-file-waveform"></i></div>`
+                                }
                                 <h4 class="font-bold text-xl mb-1 line-clamp-1" style="color: ${COLORS.blue}">${r.reportTitle}</h4>
                                 <p class="text-[10px] text-gray-400 font-black uppercase mb-4">${new Date(r.createdAt).toLocaleDateString()}</p>
                                 <div class="flex gap-2">
@@ -216,6 +244,18 @@
                                     <div class="grid grid-cols-2 gap-6">
                                         <div><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Fecha Inicio</label><input type="date" id="rep_start" required class="w-full p-4 rounded-2xl bg-white border border-gray-200 outline-none"></div>
                                         <div><label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Fecha Fin</label><input type="date" id="rep_end" required class="w-full p-4 rounded-2xl bg-white border border-gray-200 outline-none"></div>
+                                    </div>
+                                    
+                                    <!-- NUEVO: Campo de Imagen -->
+                                    <div class="mt-4">
+                                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mb-2 block">Imagen de Campaña (Opcional)</label>
+                                        <div class="flex items-center gap-4">
+                                            <label class="cursor-pointer bg-white border border-gray-200 px-5 py-4 rounded-2xl flex items-center gap-3 hover:bg-gray-50 transition-colors text-xs font-bold text-gray-600 focus-within:ring-2 focus-within:ring-[#158e45]">
+                                                <i class="fa-solid fa-upload"></i> Subir Imagen
+                                                <input type="file" id="rep_image_input" accept="image/*" class="hidden" onchange="handleReportImageUpload(event)">
+                                            </label>
+                                            <img id="rep_image_preview" class="h-16 w-24 object-cover rounded-xl border border-gray-200 shadow-sm ${window.appState.currentReportImage ? '' : 'hidden'}" src="${window.appState.currentReportImage || ''}" alt="Preview">
+                                        </div>
                                     </div>
                                 </div>
 
@@ -400,6 +440,11 @@
                             <div class="flex justify-center pt-4"><div class="h-2 w-48 rounded-full" style="background-color: ${COLORS.green}"></div></div>
                         </div>
 
+                        ${r.reportImage ? `
+                        <div class="w-full max-w-4xl mx-auto rounded-[3rem] overflow-hidden shadow-2xl border-[8px] border-white h-[300px] md:h-[400px]">
+                            <img src="${r.reportImage}" alt="Imagen de Campaña" class="w-full h-full object-cover hover:scale-105 transition-transform duration-700">
+                        </div>` : ''}
+
                         <section class="bg-white rounded-[3rem] p-10 md:p-16 shadow-2xl border-l-[16px] relative overflow-hidden" style="border-left-color: ${COLORS.green}">
                             <div class="absolute -top-12 -right-12 opacity-5 w-80 h-80 rounded-full" style="background-color: ${COLORS.blue}"></div>
                             <div class="grid md:grid-cols-5 gap-12 relative z-10">
@@ -530,6 +575,7 @@
             }
         };
 
+        // --- MANEJO DE EVENTOS ---
         const setupEventListeners = () => {
             const loginForm = document.getElementById('loginForm');
             if (loginForm) {
@@ -579,12 +625,12 @@
                         executiveSummary: document.getElementById('rep_summary').value,
                         conclusions: document.getElementById('rep_conclusions').value,
                         analogyText: document.getElementById('rep_analogy').value,
+                        reportImage: window.appState.currentReportImage || existingData.reportImage || null,
                         status: 'FINALIZADA', 
                         createdAt: existingData.createdAt || new Date().toISOString()
                     };
                     
-                    // --- SOLUCIÓN APLICADA AQUÍ ---
-                    // 1. Guardar siempre de forma local primero (Actualización Optimista)
+                    // 1. Guardar localmente
                     if (window.appState.editingReportId) {
                         const idx = window.appState.reports.findIndex(r => r.id === window.appState.editingReportId);
                         window.appState.reports[idx] = newReport;
@@ -597,12 +643,14 @@
                         try { 
                             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', newReport.id), newReport); 
                         } catch (err) { 
-                            console.error("Firebase no dejó guardar. Mostrando datos locales. Error:", err); 
-                            alert("Nota: Firebase ha denegado la escritura por problemas de permisos en las reglas. Se ha guardado en tu pantalla actual de forma temporal.");
+                            console.error("Firebase error:", err); 
+                            alert("Guardado de forma temporal en tu pantalla actual.");
                         }
                     }
                     
+                    // Limpiar estado
                     window.appState.editingReportId = null; 
+                    window.appState.currentReportImage = null;
                     window.appState.currentView = 'list'; 
                     render();
                 });
@@ -619,16 +667,11 @@
                         role: document.getElementById('new_user_role').value
                     };
                     
-                    // Optimistic update para los usuarios también
                     window.appState.users.push(newUser);
                     
                     if (isFirebaseEnabled && auth.currentUser) {
-                        try { 
-                            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', newUser.id), newUser); 
-                        } catch (err) { 
-                            console.error(err); 
-                            alert("Usuario creado de forma temporal en tu sesión actual.");
-                        }
+                        try { await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', newUser.id), newUser); } 
+                        catch (err) { console.error(err); alert("Usuario creado de forma temporal."); }
                     }
                     render();
                 });
@@ -652,19 +695,17 @@
             }
         };
 
-        window.changeView = (v) => { window.appState.editingReportId = null; window.appState.currentView = v; render(); };
+        window.changeView = (v) => { window.appState.editingReportId = null; window.appState.currentReportImage = null; window.appState.currentView = v; render(); };
         window.logout = () => { window.appState.currentView = 'login'; render(); };
         window.openReport = (id) => { window.appState.selectedReport = window.appState.reports.find(r => r.id === id); window.appState.currentView = 'view'; render(); window.scrollTo(0,0); };
         window.editReport = (e, id) => { e.stopPropagation(); window.appState.editingReportId = id; window.appState.currentView = 'create'; render(); };
-        window.cancelEdit = () => { window.appState.editingReportId = null; window.appState.currentView = 'list'; render(); };
+        window.cancelEdit = () => { window.appState.editingReportId = null; window.appState.currentReportImage = null; window.appState.currentView = 'list'; render(); };
         
         window.deleteReport = async (e, id) => { 
             e.stopPropagation(); 
             if(confirm("¿Eliminar este reporte permanentemente?")) { 
-                // Eliminar localmente primero (Optimistic update)
                 window.appState.reports = window.appState.reports.filter(r => r.id !== id); 
                 render();
-
                 if (isFirebaseEnabled && auth.currentUser) {
                     try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', id)); }
                     catch(err){ console.error(err); }
@@ -674,10 +715,8 @@
 
         window.deleteUser = async (id) => {
             if(confirm("¿Eliminar usuario?")) {
-                // Eliminar localmente primero (Optimistic update)
                 window.appState.users = window.appState.users.filter(u => u.id !== id); 
                 render();
-
                 if (isFirebaseEnabled && auth.currentUser) {
                     try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', id)); }
                     catch(err){ console.error(err); }
@@ -687,25 +726,35 @@
 
         window.celebrate = () => confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: [COLORS.green, COLORS.blue, '#ffffff'] });
 
+        // NUEVO: Función para manejar la subida de imagen del reporte
+        window.handleReportImageUpload = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (re) => {
+                window.appState.currentReportImage = re.target.result;
+                const preview = document.getElementById('rep_image_preview');
+                if (preview) {
+                    preview.src = re.target.result;
+                    preview.classList.remove('hidden');
+                }
+            };
+            reader.readAsDataURL(file);
+        };
+
         const init = async () => {
             render();
             if (isFirebaseEnabled) {
                 try {
-                    // Intento de conexión robusta: Si el token del entorno falla, usa el Anónimo de tu Firebase
                     if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        try {
-                            await signInWithCustomToken(auth, __initial_auth_token);
-                        } catch (e) {
-                            console.warn("Usando inicio de sesión anónimo (Token de entorno diferente al proyecto).", e);
-                            await signInAnonymously(auth);
-                        }
+                        try { await signInWithCustomToken(auth, __initial_auth_token); } 
+                        catch (e) { await signInAnonymously(auth); }
                     } else {
                         await signInAnonymously(auth);
                     }
 
                     onAuthStateChanged(auth, (u) => {
                         if (u) {
-                            // Cargar reportes
                             onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'reports')), (snap) => {
                                 let dbData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                                 const baseIds = INITIAL_REPORTS.map(r => r.id);
@@ -713,18 +762,13 @@
                                 window.appState.reports = [...INITIAL_REPORTS, ...filteredDb];
                                 window.appState.reports.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
                                 if (window.appState.currentView === 'list') render();
-                            }, (error) => {
-                                console.warn("Permiso denegado por Firebase para leer reportes. Usando datos locales.", error.message);
                             });
-                            // Cargar usuarios
                             onSnapshot(query(collection(db, 'artifacts', appId, 'public', 'data', 'users')), (snap) => {
                                 let dbData = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                                 const baseIds = INITIAL_USERS.map(r => r.id);
                                 const filteredDb = dbData.filter(d => !baseIds.includes(d.id));
                                 window.appState.users = [...INITIAL_USERS, ...filteredDb];
                                 if (window.appState.currentView === 'config') render();
-                            }, (error) => {
-                                console.warn("Permiso denegado por Firebase para leer usuarios. Usando datos locales.", error.message);
                             });
                         }
                     });
@@ -733,17 +777,6 @@
         };
         init();
     </script>
-    <style>
-        * { font-family: 'Poppins', sans-serif; }
-        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes bounce-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        .animate-bounce-slow { animation: bounce-slow 2s infinite ease-in-out; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        /* Permite saltos de linea en los textos generados */
-        .whitespace-pre-wrap { white-space: pre-wrap; }
-        @media print { .no-print { display: none !important; } nav { display: none !important; } }
-    </style>
 </head>
 <body><div id="root"></div></body>
 </html>
